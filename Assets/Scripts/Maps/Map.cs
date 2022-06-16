@@ -62,6 +62,20 @@ public class Map : MonoBehaviour
     {
         UpdateLevelWon();
         if (Won() && !levelOver) OnWin();
+        if (Input.GetKeyDown(KeyCode.R)) ResetMap();
+    }
+
+    /// <summary>
+    /// Resets this map to how it started originally.
+    /// </summary>
+    public void ResetMap()
+    {
+        foreach(Square s in allSquares)
+        {
+            s.ResetGridPosition();
+        }
+        levelOver = false;
+        mapWon = false;
     }
 
     /// <summary>

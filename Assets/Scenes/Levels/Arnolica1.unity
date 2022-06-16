@@ -383,7 +383,7 @@ MonoBehaviour:
   squareSize: 1.5
   mapSize: 5
   sceneChanger: {fileID: 100035704}
-  dialogue: {fileID: 0}
+  dialogue: {fileID: 1483635797}
   mapBackground: {fileID: 0}
   placeholderSprite: {fileID: 21300000, guid: 9d3c714ab330fb941a0d0581c896abf1, type: 3}
   placeholderParent: {fileID: 2100365201}
@@ -2120,32 +2120,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 1483635795}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8def34766c66d9047958f6484b164de6, type: 3}
+  m_Script: {fileID: 11500000, guid: aa2d2c1239e4e724883c9953669d3322, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startQuotes:
-  - Hello again.
-  - Let's see what you've got here.
-  - Ah, this map is larger than the last. And it has three districts.
-  - Remember, we only need a majority of districts, not all of them, to win this
-    map.
-  - That means you only need to fix two districts.
-  - And something else.
-  - I haven't told you this, but the law in this country puts limits on the redistricting
-    process.
-  - The Life Party watches us redraw these maps. The more you move a shaky voter
-    bloc, the more suspicious they get.
-  - If you move too many times, they can take your map to court to invalidate it.
-  - 'Plus, you''ll have to deal with the Life Party''s president, Kaitlyn. '
-  - She's not fun.
-  - Long story short, use as few moves as possible.
-  - Alright. Back to work.
+  startQuotes: []
   afterWinQuotes: []
   textBox: {fileID: 564188125}
   dialogueAnimator: {fileID: 1483635798}
-  speakOnStartDelay: 2
-  speakAfterWinDelay: 0
+  speakOnStartDelay: 3
+  speakAfterWinDelay: 2
   map: {fileID: 163554009}
+  dialogueImage: {fileID: 1483635799}
+  regryPanel: {fileID: 21300000, guid: 21c270469145a4545999f023dbff2308, type: 3}
+  kaitlynPanel: {fileID: 21300000, guid: 4eed31758d5606e43b1777b41c499477, type: 3}
 --- !u!95 &1483635798
 Animator:
   serializedVersion: 3

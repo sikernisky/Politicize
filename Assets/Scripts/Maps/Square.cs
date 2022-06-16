@@ -111,17 +111,28 @@ public class Square : MonoBehaviour
     /// <summary>true if user is hovering over this Square, false otherise.</summary>
     private bool hovering;
 
+    /// <summary>This Square's starting x position.</summary>
+    private int startX;
+
+    /// <summary>This Square's starting y position.</summary>
+    private int startY;
+
+    /// <summary>The District this Square starts under.</summary>
+    private District startParentDistrict;
+
 
     private void Start()
     {
 
         sRend = GetComponent<SpriteRenderer>();
         selectedSquares = new HashSet<Square>();
+        startX = xPos;
+        startY = yPos;
 
 
         FindParentDistrictAndMap();
         DisplayConnectors();
-        SetGridPosition();
+        ResetGridPosition();
         if (majorityAnimation != null && majorityRenderer != null) StartCoroutine(StartMajorityAnimation());
 
     }
@@ -142,6 +153,8 @@ public class Square : MonoBehaviour
 
         Map m = transform.parent.parent.GetComponent<Map>();
         parentMap = m;
+
+        startParentDistrict = parentDistrict;
     }
 
     /// <summary>
@@ -150,11 +163,19 @@ public class Square : MonoBehaviour
     /// <br></br>The position is its X and Y positions multiplied by the Square size
     /// determined by its parent map.
     /// </summary>
-    private void SetGridPosition()
+    public void ResetGridPosition()
     {
-        transform.localPosition = new Vector2(parentMap.SquareSize() * xPos,
-            parentMap.SquareSize() * yPos);
+        xPos = startX;
+        yPos = startY;
+
+        DisplayConnectors();
+
+        transform.localPosition = new Vector2(parentMap.SquareSize() * startX,
+            parentMap.SquareSize() * startY);
         sRend.sortingOrder = 2;
+
+        transform.SetParent(startParentDistrict.transform);
+
     }
 
     private void OnMouseDown()

@@ -62,7 +62,6 @@ public class SwappableSquare : Square
         base.Select();
         deselectedSprite = CurrentSprite();
         SetSprite(selectedSprite);
-        Debug.Log("Here");
     }
 
     protected override void DeSelect()

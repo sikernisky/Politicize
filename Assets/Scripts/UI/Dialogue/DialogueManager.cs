@@ -57,7 +57,9 @@ public class DialogueManager : MonoBehaviour
     /// <summary>true if the current dialogue is the last of this Dialogue.</summary>
     private bool lastDialgoue;
 
-
+    [SerializeField]
+    ///<summary>The SpriteRenderer for this Dialogue.</summary>
+    private Image dialogueImage;
 
     public virtual void Start()
     {
@@ -208,6 +210,16 @@ public class DialogueManager : MonoBehaviour
     public bool SpeakAfterWin()
     {
         return afterWinQuotes != null && afterWinQuotes.Length > 0;
+    }
+
+    /// <summary>
+    /// Sets the Dialogue sprite. S cannot be null.
+    /// </summary>
+    /// <param name="s">The sprite to set the Dialogue to.</param>
+    protected void UpdateDialogueImage(Sprite s)
+    {
+        if (s == null) return;
+        dialogueImage.sprite = s;
     }
 }
 
