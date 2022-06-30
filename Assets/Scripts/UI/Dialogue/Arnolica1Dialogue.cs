@@ -14,18 +14,37 @@ public class Arnolica1Dialogue : DialogueManager
     ///<summary>Image for Kaitlyn dialogue.</summary>
     private Sprite kaitlynPanel;
 
+    /// <summary>true if the player is trying this map again.</summary>
+    private bool onRetry;
+
+    [SerializeField]
+    ///<summary>The swap counter animator for this level.</summary>
+    private Animator swapCounter;
+
+    [SerializeField]
+    ///<summary>Arrow for the Death Party's dialogue.</summary>
+    private Sprite deathArrow;
+
+    [SerializeField]
+    ///<summary>Arrow for the Life Party's dialogue.</summary>
+    private Sprite lifeArrow;
+
 
     public override void Start()
     {
+        if (SaveManager.data.arnolica1DialogueCompleted)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         startQuotes = new string[] {
             "Hello again.",
             "Let's see what you've got here.",
-            "Ah, this map is larger than the last. And it has three districts.",
-            "Remember, we only need a majority of districts, not all of them, to win this map.",
-            "That means you only need to fix two districts.",
-            "And something else.",
+            "Ah, this map is larger than the last. It should be fine for you, though.",
+            "Also.",
             "I haven't told you this, but the law in this country puts limits on the redistricting process.",
-            "The Life Party watches us redraw these maps. The more you move a shaky voter bloc, the more suspicious they get.",
+            "The Life Party watches us redraw these maps. The more you move a voter bloc, the more suspicious they get.",
             "If you move too many times, they can take your map to court to invalidate it.",
             "Plus, you'll have to deal with the Life Party's president, Kaitlyn. ",
             "She's not fun.",
@@ -37,24 +56,33 @@ public class Arnolica1Dialogue : DialogueManager
             "You there!",
             "Cease what you're doing immediately.",
             "Unbelievable. Regry Darmen must have recruited you.",
-            "Why would you do evils for him? You have education from a top university. Don't you know bet-",
-            "Hey there, Kaitlyn.",
-            "Please, Mr. Darmen, refer to me as Madame President.",
-            "What your... client? Intern? Trainee? What they did here today was completely illegal.",
+            "This is a closed meeting, Kaitlyn.",
+            "Please, President Darmen, refer to me as Madame President.",
+            "And what your client did here today was completely illegal. You know this.",
+            "That's " + SaveManager.data.playerName + " to you.",
+            "President Darmen.",
             "Yes, you have redistricting power. But you still must follow the law.",
-            "The LAW! Hah.",
-            "The rules that you passed without the input of even one Death Party representative?",
-            "Yes, Mr. Darmen, those laws, supported by democratically elected Life Party candidates.",
+            "The laws that you passed without the input of even one Death Party representative?",
+            "Yes, President Darmen, those laws, supported by democratically elected Life Party candidates.",
             "Rectify this atrocity, or I will sue.",
-            "I will be back soon to ensure you two have made the necessary changes.",
             "...",
             "I told you, " + SaveManager.data.playerName + ", she's no fun.",
             "Look, I'm going to provide you with a swap limit.",
             "If you stay under that many swaps, Madame President has no real court case.",
             "Try this again."
         };
-
         base.Start();
+    }
+
+    protected override void Update()
+    {
+        if (onRetry && map.Won())
+        {
+            onRetry = false;
+            map.EndLevel();
+        }
+        else if (onRetry && map.TooManySwaps()) map.ResetMap(.1f);
+        else base.Update();
     }
 
     public override void NextQuote()
@@ -62,31 +90,65 @@ public class Arnolica1Dialogue : DialogueManager
 
         string nextQuote = NextQuoteText();
 
+        string constantQuote = "That's " + SaveManager.data.playerName + " to you.";
+
+        if (nextQuote == constantQuote)
+        {
+            UpdateDialogueImage(regryPanel);
+            UpdateDialogueArrow(deathArrow);
+        }
+
         switch (nextQuote)
         {
             case "You there!":
                 UpdateDialogueImage(kaitlynPanel);
+                UpdateDialogueArrow(lifeArrow);
                 break;
-            case "Hey there, Kaitlyn.":
+            case "This is a closed meeting, Kaitlyn.":
                 UpdateDialogueImage(regryPanel);
+                UpdateDialogueArrow(deathArrow);
                 break;
-            case "Please, Mr. Darmen, refer to me as Madame President.":
+            case "Please, President Darmen, refer to me as Madame President.":
                 UpdateDialogueImage(kaitlynPanel);
+                UpdateDialogueArrow(lifeArrow);
                 break;
-            case "The LAW! Hah.":
+            case "President Darmen.":
+                UpdateDialogueImage(kaitlynPanel);
+                UpdateDialogueArrow(lifeArrow);
+                break;
+            case "The laws that you passed without the input of even one Death Party representative?":
                 UpdateDialogueImage(regryPanel);
+                UpdateDialogueArrow(deathArrow);
                 break;
-            case "Yes, Mr. Darmen, those laws, supported by democratically elected Life Party candidates.":
+            case "Yes, President Darmen, those laws, supported by democratically elected Life Party candidates.":
                 UpdateDialogueImage(kaitlynPanel);
+                UpdateDialogueArrow(lifeArrow);
                 break;
             case "...":
                 UpdateDialogueImage(regryPanel);
+                UpdateDialogueArrow(deathArrow);
+                break;
+            case "Look, I'm going to provide you with a swap limit.":
+                swapCounter.SetTrigger("fadeCounterIn");
+                break;
+            case "Try this again.":
+                map.ResetMap();
+                map.EnableSwapLimit();
+                onRetry = true;
                 break;
             default:
                 break;
         }
-
-
         base.NextQuote();
+    }
+
+    protected override void EnterPressed()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) && started) NextQuote();
+    }
+
+    public override void ClickDialogueButton()
+    {
+        if (started) NextQuote();
     }
 }

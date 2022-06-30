@@ -48,28 +48,45 @@ public class DialogueManager : MonoBehaviour
     private float speakAfterWinDelay;
 
     /// <summary>true if this dialogue has started.</summary>
-    private bool started;
+    protected bool started;
 
     [SerializeField]
     ///<summary>This level's map.</summary>
     protected Map map;
 
     /// <summary>true if the current dialogue is the last of this Dialogue.</summary>
-    private bool lastDialgoue;
+    private bool lastDialogue;
 
     [SerializeField]
-    ///<summary>The SpriteRenderer for this Dialogue.</summary>
+    ///<summary>The Image for this Dialogue.</summary>
     private Image dialogueImage;
+
+    [SerializeField]
+    ///<summary>The Image for this Dialogue's arrow.</summary>
+    private Image dialogueArrowImage;
+
+    /// <summary>True if this Dialogue has asked the Map to end the level.</summary>
+    private bool ended;
+
+    [SerializeField]
+    ///<summary>Audioclip that plays whenever a text is revealed. </summary>
+    private AudioClip textAudio;
+
+    [SerializeField]
+    ///<summary>This DialogueManager's AudioManager.</summary>
+    private AudioManager audioManager;
 
     public virtual void Start()
     {
+        ResetDialogue();
         StartCoroutine(StartDelay(startQuotes, speakOnStartDelay));
     }
 
 
-    public void Update()
+    protected virtual void Update()
     {
         EnterPressed();
+        TryStartWinDialogue();
     }
 
     /// <summary>
@@ -77,20 +94,30 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     protected virtual void EnterPressed()
     {
-        if(Input.GetKeyDown(KeyCode.Return) && lastDialgoue && currentQuoteNum == currentQuotes.Length -1)
+        if (Input.GetKeyDown(KeyCode.Return)) ClickDialogueButton();
+    }
+
+    public virtual void ClickDialogueButton()
+    {
+        if(lastDialogue && OutOfCurrentQuotes() && !ended)
         {
             map.EndLevel();
+            ended = true;
             return;
         }
-        if (Input.GetKeyDown(KeyCode.Return) && started) NextQuote();
+        if (started) NextQuote();
     }
 
     private IEnumerator StartDelay(string[] quotes, float delay)
     {
-        LevelManager.playable = false;
-        if (delay >= 0.0) yield return new WaitForSeconds(speakOnStartDelay);
-        else yield return new WaitForSeconds(0);
-        StartDialogue(quotes);
+        if(quotes != null && quotes.Length > 0)
+        {
+            LevelManager.playable = false;
+            if (delay >= 0.0) yield return new WaitForSeconds(speakOnStartDelay);
+            else yield return new WaitForSeconds(0);
+            StartDialogue(quotes);
+        }
+        yield return null;
     }
 
 
@@ -112,10 +139,19 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// Starts this DialogueManager's win dialogue process.
     /// </summary>
-    public void StartWinDialogue()
+    private void StartWinDialogue()
     {
-        lastDialgoue = true;
+        if (started) return;
+        lastDialogue = true;
         StartCoroutine(StartDelay(afterWinQuotes, speakAfterWinDelay));
+    }
+
+    private void TryStartWinDialogue()
+    {
+        if (map.Won() && !lastDialogue && !started && hidden && afterWinQuotes != null)
+        {
+            StartWinDialogue();
+        }
     }
 
 
@@ -127,16 +163,13 @@ public class DialogueManager : MonoBehaviour
         if (!started) return;
         if (hidden) return;
 
-
-        currentQuoteNum++;
-
-
         //No more quotes.
-        if (currentQuoteNum == currentQuotes.Length)
+        if (currentQuoteNum == currentQuotes.Length - 1 || currentQuotes == null)
         {
             ResetDialogue();
             return;
         }
+        //audioManager.PlaySound(textAudio);
 
         if (revealCoroutine != null) StopCoroutine(revealCoroutine);
         revealCoroutine = RevealText(currentQuotes);
@@ -146,11 +179,10 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// Resets this Dialogue and prepares it for another set of quotes.
     /// </summary>
-    
-
     private void ResetDialogue()
     {
         HideDialogueBox();
+        currentQuotes = null;
         started = false;
         currentQuoteNum = -1;
         LevelManager.playable = true;
@@ -162,6 +194,7 @@ public class DialogueManager : MonoBehaviour
     /// <returns>The IENumerator of this Coroutine.</returns>
     private IEnumerator RevealText(string[] quotes)
     {
+        currentQuoteNum++;
         textBox.maxVisibleCharacters = 0;
         textBox.text = quotes[currentQuoteNum];
         foreach(char c in textBox.text)
@@ -177,7 +210,7 @@ public class DialogueManager : MonoBehaviour
     private void ShowDialogueBox()
     {
         if (!hidden) return;
-        dialogueAnimator.SetTrigger("resize");
+        dialogueAnimator.SetBool("show", true);
         hidden = false;
     }
 
@@ -188,7 +221,7 @@ public class DialogueManager : MonoBehaviour
     private void HideDialogueBox()
     {
         if (hidden) return;
-        dialogueAnimator.SetTrigger("resize");
+        dialogueAnimator.SetBool("show", false);
         hidden = true;
     }
 
@@ -220,6 +253,25 @@ public class DialogueManager : MonoBehaviour
     {
         if (s == null) return;
         dialogueImage.sprite = s;
+    }
+
+    /// <summary>
+    /// Sets the Dialogue arrow sprite. S cannot be null.
+    /// </summary>
+    /// <param name="s">The sprite to set the Dialogue arrow to.</param>
+    protected void UpdateDialogueArrow(Sprite s)
+    {
+        if (s == null) return;
+        dialogueArrowImage.sprite = s;
+    }
+
+    /// <summary>
+    /// Returns true if there are no more current quotes.
+    /// </summary>
+    /// <returns>true if there are no more current quotes, false otherwise.</returns>
+    protected bool OutOfCurrentQuotes()
+    {
+        return currentQuotes == null || currentQuoteNum >= currentQuotes.Length - 1;
     }
 }
 

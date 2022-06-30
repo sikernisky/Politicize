@@ -29,6 +29,7 @@ public class LevelSelect : MonoBehaviour
     private void Start()
     {
         GatherBoxes();
+        SaveManager.data.currentFaction = CurrentFaction();
     }
 
     /// <summary>
@@ -53,6 +54,7 @@ public class LevelSelect : MonoBehaviour
         int increment = boxes.Count;
         currentPage++;
         foreach(LevelBox lb in boxes) { lb.IncrementNumber(increment); }
+        SaveManager.data.currentFaction = CurrentFaction();
     }
 
     /// <summary>

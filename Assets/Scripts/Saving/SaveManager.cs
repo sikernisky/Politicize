@@ -22,6 +22,11 @@ public class SaveManager : MonoBehaviour
         Load();
     }
 
+    private void Update()
+    {
+        Save();
+    }
+
     public void Save()
     {
         string json = JsonUtility.ToJson(data);
@@ -34,9 +39,11 @@ public class SaveManager : MonoBehaviour
         {
             data = new PlayerData();
             Save();
+            return;
         }
 
         string loadedData = File.ReadAllText(path);
         data = JsonUtility.FromJson<PlayerData>(loadedData);
     }
+
 }

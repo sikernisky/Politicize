@@ -27,6 +27,14 @@ public class SceneChangeButton: MonoBehaviour
         else SceneManager.LoadScene(sceneName);
     }
 
+    /// <summary>
+    /// Quits the game.
+    /// </summary>
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
     IEnumerator ChangeSceneFade(string sceneName)
     {
         fader.SetTrigger("fade");

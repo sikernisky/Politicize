@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Represents the container for all Squares in a level.
@@ -48,6 +50,45 @@ public class Map : MonoBehaviour
     ///<summary>Parent GameObject holding placeholder tiles.</summary>
     private GameObject placeholderParent;
 
+    [SerializeField]
+    ///<summary>Maximum number of swaps the player can make this Map.</summary>
+    private int swapLimit;
+
+    [SerializeField]
+    /// <summary>true if there should be no swap limit to win this Map.</summary>
+    private bool swapLimitDisabled;
+
+    [SerializeField]
+    ///<summary>The swap counter text for this Map.</summary>
+    private TMP_Text swapCounterText;
+
+    [SerializeField]
+    ///<summary>The district counter text for this Map.</summary>
+    private TMP_Text districtCounterText;
+
+    [SerializeField]
+    ///<summary>The text displaying how many districts are needed to win.</summary>
+    private TMP_Text districtsNeededText;
+
+    [SerializeField]
+    ///<summary>Name of this map.</summary>
+    private string mapName;
+
+    [SerializeField]
+    ///<summary>Text component displaying this Map's name.</summary>
+    private TMP_Text mapNameText;
+
+    [SerializeField]
+    ///<summary>Faction this map is in.</summary>
+    private string faction;
+
+    [SerializeField]
+    ///<summary>Level number of this map.</summary>
+    private int levelNum;
+
+
+
+
     private void Awake()
     {
         GatherDistrictsAndSquares();
@@ -55,14 +96,23 @@ public class Map : MonoBehaviour
 
     private void Start()
     {
+        SetCurrentLevel();
         FillMap();
+        SetupSwapCounter();
+        SetupMapName();
+        SetSizes();
+        LevelManager.playable = true;
     }
 
     private void Update()
     {
+        UpdateAllConnectors();
+        UpdateAllDistrictSquares();
         UpdateLevelWon();
+        UpdateSwapCounter();
+        UpdateDistrictCounter();
+        TryResetMap();
         if (Won() && !levelOver) OnWin();
-        if (Input.GetKeyDown(KeyCode.R)) ResetMap();
     }
 
     /// <summary>
@@ -72,10 +122,46 @@ public class Map : MonoBehaviour
     {
         foreach(Square s in allSquares)
         {
-            s.ResetGridPosition();
+            s.OnReset();
         }
         levelOver = false;
-        mapWon = false;
+        SwappableSquare.ResetSwapCount();
+    }
+
+    /// <summary>
+    /// Tries to reset the Map. Needs swap limit enabled.
+    /// </summary>
+    private void TryResetMap()
+    {
+        if (swapLimitDisabled) return;
+        if (Won()) return;
+        if (TooManySwaps()) ResetMap(0);
+    }
+
+    /// <summary>
+    /// Resets this map to how it started originally after some time.
+    /// </summary>
+    /// <param name="delay">How long to wait before resetting.</param>
+    public void ResetMap(float delay)
+    {
+        SwappableSquare.ResetSwapCount();
+        StartCoroutine(ResetMapWithDelay(delay));
+    }
+
+    private IEnumerator ResetMapWithDelay(float delay)
+    {
+        LevelManager.playable = false;
+        yield return new WaitForSeconds(delay);
+        ResetMap();
+        LevelManager.playable = true;
+    }
+
+    private void SetSizes()
+    {
+        foreach(Square s in allSquares)
+        {
+            s.transform.localScale = new Vector2(squareSize, squareSize);
+        }
     }
 
     /// <summary>
@@ -83,11 +169,8 @@ public class Map : MonoBehaviour
     /// </summary>
     private void OnWin()
     {
-        if (dialogue != null && dialogue.SpeakAfterWin())
-        {
-            dialogue.StartWinDialogue();
-        }
-        else EndLevel();
+        if (dialogue == null) EndLevel();
+        else Debug.Log("Dialogue is to take care of ending this level.");
     }
 
     /// <summary>
@@ -98,8 +181,8 @@ public class Map : MonoBehaviour
     {
         LevelManager.playable = false;
         levelOver = true;
-        sceneChanger.ChangeScene("LevelSelect");
         SaveManager.data.IncrementLevel();
+        sceneChanger.ChangeScene(SaveManager.data.currentFaction + SaveManager.data.currentLevel.ToString());
     }
 
     /// <summary>
@@ -159,20 +242,41 @@ public class Map : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns the size of this Map.
+    /// </summary>
+    /// <returns>the integer size of this Map.</returns>
+    public int Size()
+    {
+        return mapSize;
+    }
+
+    /// <summary>
     /// Sets mapWon to true if all Districts have their win conditions satisfied.
     /// </summary>
     private void UpdateLevelWon()
     {
         int wonDistricts = 0;
-
         foreach(District d in districts)
         {
             if (d.WinConditionMet()) wonDistricts++;
         }
-
         float ratio = (float)wonDistricts / districts.Count;
-        if (ratio > .5) mapWon = true;
-        else mapWon = false;
+
+
+        //Checking for disqualifying conditions.
+
+        if (ratio <= .5) mapWon = false;
+        else if (SwappableSquare.TotalSwapsPerformed() > swapLimit && !swapLimitDisabled) mapWon = false;
+        else mapWon = true;
+    }
+
+    /// <summary>
+    /// Returns true if the player has gone over the swap limit.
+    /// </summary>
+    /// <returns>true if the player has gone over the swap limit.</returns>
+    public bool TooManySwaps()
+    {
+        return SwappableSquare.TotalSwapsPerformed() >= swapLimit;
     }
 
     /// <summary>
@@ -180,14 +284,30 @@ public class Map : MonoBehaviour
     /// </summary>
     private void FillMap()
     {
-        for (int x = (int)mapSize / -2; x <= (int)mapSize / 2; x++)
+        if(mapSize % 2 == 0)
         {
-            for (int y = (int)mapSize / -2; y <= (int)mapSize / 2; y++)
+            for(int x = mapSize / -2; x <= (mapSize / 2) - 1; x++)
             {
-                Vector2 pos = new Vector2(x, y);
-                if (SquareByPos(pos) == null) SpawnPlaceholderTile(pos);
+                for(int y = mapSize / -2; y <= (mapSize / 2) - 1; y++)
+                {
+                    Vector2 pos = new Vector2(x + .5f, y + .5f);
+                    if (SquareByPos(pos) == null) SpawnPlaceholderTile(pos);
+                }
             }
         }
+        else
+        {
+            for (int x = mapSize / -2; x <= mapSize / 2; x++)
+            {
+                for (int y = mapSize / -2; y <= mapSize / 2; y++)
+                {
+                    Debug.Log(new Vector2(x, y));
+                    Vector2 pos = new Vector2(x, y);
+                    if (SquareByPos(pos) == null) SpawnPlaceholderTile(pos);
+                }
+            }
+        }
+
     }
 
     /// <summary>
@@ -205,6 +325,123 @@ public class Map : MonoBehaviour
 
         rend.sprite = placeholderSprite;
         rend.sortingOrder = 1;
+    }
+
+    /// <summary>
+    /// Updates all Squares to display the correct connectors.
+    /// </summary>
+    public void UpdateAllConnectors()
+    {
+        foreach(Square s in allSquares)
+        {
+            s.DisplayConnectors();
+        }
+    }
+
+    /// <summary>
+    /// Updates all District's squares.
+    /// </summary>
+    public void UpdateAllDistrictSquares()
+    {
+        foreach(District d in districts)
+        {
+            d.UpdateSquares();
+        }
+    }
+
+
+    /// <summary>
+    /// Adds to the SwapLimit.
+    /// </summary>
+    /// <param name="amount">The amount to add.</param>
+    public void AddToSwapLimit(int amount)
+    {
+        swapLimit += amount;
+    }
+
+    /// <summary>
+    /// Enables the SwapLimit for this map.
+    /// </summary>
+    public void EnableSwapLimit()
+    {
+        swapLimitDisabled = false;
+    }
+
+    /// <summary>
+    /// Disables the SwapLimit for this map.
+    /// </summary>
+    public void DisableSwapLimit()
+    {
+        swapLimitDisabled = true;
+    }
+
+    /// <summary>
+    /// Updates the Swap counter to display the remaining number of swaps.
+    /// </summary>
+    private void UpdateSwapCounter()
+    {
+        if (swapLimitDisabled) return;
+        if (swapCounterText == null) return;
+        swapCounterText.text = (swapLimit - SwappableSquare.TotalSwapsPerformed()).ToString();
+        if (swapLimit - SwappableSquare.TotalSwapsPerformed() <= 3) swapCounterText.color = new Color32(255, 0, 0, 255);
+        else swapCounterText.color = new Color32(0, 0, 0, 255);
+    }
+
+    /// <summary>
+    /// Updates the district counter to display total number of districts completed.
+    /// </summary>
+    private void UpdateDistrictCounter()
+    {
+        if (districtsNeededText == null) return;
+        if (districtCounterText == null) return;
+        int numWon = 0;
+        foreach(District d in districts)
+        {
+            if (d.WinConditionMet()) numWon++;
+        }
+        districtCounterText.text = (numWon.ToString()) + "/" + (districts.Count.ToString());
+        districtsNeededText.text = "NEED TO WIN: " + NeededDistricts().ToString(); 
+    }
+
+    /// <summary>
+    /// Returns the number of districts needed to win this Map.
+    /// </summary>
+    /// <returns>The int number of districts needed to win this Map.</returns>
+    private int NeededDistricts()
+    {
+        for (int i = 1; i <= districts.Count; i++)
+        {
+            if ((float)i / (float)districts.Count > .5f) return i;
+        }
+        return districts.Count;
+    }
+
+    /// <summary>
+    /// Sets up the Swap Counter so that it displays the initial swap limit.
+    /// </summary>
+    private void SetupSwapCounter()
+    {
+        if (swapCounterText == null) return;
+        SwappableSquare.ResetSwapCount();
+        swapCounterText.text = swapLimit.ToString();
+    }
+
+    /// <summary>
+    /// Sets up the display for this Map's name.
+    /// </summary>
+    private void SetupMapName()
+    {
+        if (mapName == default) mapName = "INTERIM PROPOSAL";
+        mapNameText.text = "PROPOSAL " + mapName;
+    }
+
+    /// <summary>
+    /// Sets the current level number and faction.
+    /// </summary>
+    private void SetCurrentLevel()
+    {
+        SaveManager.data.currentFaction = faction;
+        SaveManager.data.currentLevel = levelNum;
     }
 
 }

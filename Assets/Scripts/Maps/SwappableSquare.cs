@@ -9,12 +9,23 @@ using UnityEngine;
 /// </summary>
 public class SwappableSquare : Square
 {
-    [SerializeField]
-    /// <summary>The Sprite representing this SwappableSquare when it is selected.</summary>
-    private Sprite selectedSprite;
 
-    /// <summary>The Sprite representing this SwappableSquare when it is deselected. </summary>
-    private Sprite deselectedSprite;
+    /// <summary>Number of swaps made by all SwappableSquares.</summary>
+    private static int totalSwapsMade;
+
+    /// <summary>Number of swaps made by this SwappableSquare.</summary>
+    private int swapsMade;
+
+    [SerializeField]
+    ///<summary>Sprite representing this Swappable when locked and selected.</summary>
+    private Sprite lockedSelected;
+
+
+    protected override void Update()
+    {
+        base.Update();
+        TrySwap();
+    }
 
     /// <summary>
     /// Swaps this SwappableSquare.
@@ -23,22 +34,22 @@ public class SwappableSquare : Square
     /// <returns>Nothing.</returns>
     private void Swap(Direction d)
     {
-
         Square target = Neighbor(d);
         if (target == null || !target.CanSwapWith()) return;
 
-
         SwapPositions(target);
         SwapDistricts(target);
-        
 
-        Vector3 pos1 = target.transform.localPosition;
-        Vector3 pos2 = transform.localPosition;
-        target.transform.localPosition = pos2;
-        transform.localPosition = pos1;
+        if (Locked()) transform.localPosition = LockedPosition();
+        else transform.localPosition = UnlockedPosition();
+        if (target.Locked()) target.transform.localPosition = target.LockedPosition();
+        else target.transform.localPosition = target.UnlockedPosition();
 
-        DisplayConnectors();
-        target.DisplayConnectors();
+        //ParentDistrict().UnHighlightAll();
+        //target.ParentDistrict().UnHighlightAll();
+
+        swapsMade++;
+        totalSwapsMade++;
     }
 
 
@@ -57,23 +68,44 @@ public class SwappableSquare : Square
         }
     }
 
-    protected override void Select()
+    /// <summary>
+    /// Returns the number of swaps made by all SwappableSquares across all Maps.
+    /// </summary>
+    /// <returns>the number of swaps made by all SwappableSquares across all Maps.</returns>
+    public static int TotalSwapsPerformed()
     {
-        base.Select();
-        deselectedSprite = CurrentSprite();
-        SetSprite(selectedSprite);
+        return totalSwapsMade;
     }
 
-    protected override void DeSelect()
+    /// <summary>
+    /// Changes the SwappableSquare swap count to zero.
+    /// 
+    /// Does NOT affect individual Squares' swap count.
+    /// </summary>
+    public static void ResetSwapCount()
     {
-        base.DeSelect();
-        SetSprite(deselectedSprite);
+        totalSwapsMade = 0;
     }
 
-    private void Update()
+    /// <summary>
+    /// Returns the number of Swaps this SwappableSquare has made.
+    /// </summary>
+    /// <returns>the number of Swaps this SwappableSquare has made.</returns>
+    public int NumSwaps()
     {
-        DisplayConnectors();
-        TrySwap();
+        return swapsMade;
+    }
+
+    public override void LockSquare(Sprite customLockedSprite = null)
+    {
+        if (Selected()) base.LockSquare(lockedSelected);
+        else base.LockSquare();
+    }
+
+    public override void UnlockSquare(Sprite customUnlockedSprite = null)
+    {
+        if (Selected()) base.UnlockSquare(selectedSprite);
+        else base.UnlockSquare();
     }
 
 }

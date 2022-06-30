@@ -47,6 +47,7 @@ public class LevelBox : MonoBehaviour
     public void ClickBox()
     {
         sceneChanger.ChangeScene(levelSelect.CurrentFaction() + levelNumber.ToString());
+        SaveManager.data.currentLevel = levelNumber;
     }
 
     /// <summary>

@@ -15,35 +15,45 @@ public class District : MonoBehaviour
     ///<summary>The name of this District.</summary>
     private string districtName;
 
-    /// <summary>true if this District is highlighted. </summary>
-    private bool highlighted;
+/*    /// <summary>true if this District is highlighted. </summary>
+    private bool highlighted;*/
+
 
     private void Awake()
     {
         UpdateSquares();
     }
 
+
     private void Update()
     {
-        if (!highlighted) HighlightAll();
-        else UnHighlightAll();
+        TryLockSquares();
+        HighlightAll();
     }
-
 
     /// <summary>
     /// Finds all Squares in this District.
     /// </summary>
     /// <returns>A HashSet of all found Squares.</returns>
-    public void UpdateSquares()
+    private HashSet<Square> FindSquares()
     {
         HashSet<Square> childSquares = new HashSet<Square>();
-        foreach(Transform t in transform)
+        foreach (Transform t in transform)
         {
             Square s = t.GetComponent<Square>();
             if (s != null) childSquares.Add(s);
         }
-        squares = childSquares;
+        return childSquares;
     }
+
+    /// <summary>
+    /// Updates this District's squares.
+    /// </summary>
+    public void UpdateSquares()
+    {
+        squares = FindSquares();
+    }
+
 
     /// <summary>
     /// Returns true if any part of this district is being hovered over.
@@ -64,14 +74,14 @@ public class District : MonoBehaviour
     /// <returns>None</returns>
     public void HighlightAll()
     {
-        if (HoveringDistrict() && !highlighted)
+        if (HoveringDistrict())
         {
             foreach (Square s in squares)
             {
                 s.Highlight();
             }
-            highlighted = true;
         }
+        else UnHighlightAll();
 
     }
 
@@ -81,15 +91,10 @@ public class District : MonoBehaviour
     /// <returns>None</returns>
     public void UnHighlightAll()
     {
-        if (!HoveringDistrict() && highlighted)
+        foreach (Square s in squares)
         {
-            foreach (Square s in squares)
-            {
-                s.UnHighlight();
-            }
-            highlighted = false;
-        }
-
+            s.UnHighlight();
+        }        
     }
 
 
@@ -121,6 +126,16 @@ public class District : MonoBehaviour
         return PercentageDeath() > .5f;
     }
 
+
+    /// <summary>
+    /// Returns true if every Square in this District is a Death Party tile.
+    /// </summary>
+    /// <returns>true if every Square in this District is a Death Party tile, false otherwise.</returns>
+    public bool AbsoluteMajority()
+    {
+        return PercentageDeath() >= 1f;
+    }
+
     /// <summary>
     /// Returns the percentage of Squares in this District that represent
     /// the death party.
@@ -139,7 +154,9 @@ public class District : MonoBehaviour
     /// the Death Party.</returns>
     public int NumDeath()
     {
+        squares = FindSquares();
         int totalDeath = 0;
+
         foreach (Square s in squares)
         {
             if (s.PoliticalParty() == Party.Death) totalDeath++;
@@ -147,5 +164,32 @@ public class District : MonoBehaviour
         }
         return totalDeath;
     }
+
+    public override string ToString()
+    {
+        string result = name + ":";
+
+        foreach(Square s in squares)
+        {
+            result += " " + s.name + " " + s.PoliticalParty().ToString() + "\n";
+        }
+
+        return result;
+
+    }
+
+    /// <summary>
+    /// Locks all Squares in this district if it has a majority.
+    /// </summary>
+    private void TryLockSquares()
+    {
+        foreach(Square s in squares)
+        {
+            if (WinConditionMet()) s.LockSquare();
+            else s.UnlockSquare();
+        }
+    }
+
+    
 
 }

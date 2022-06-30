@@ -15,6 +15,13 @@ public class TutorialDialogue : DialogueManager
     private Animator nameBoxAnimator;
 
     [SerializeField]
+    ///<summary>The Animator for the ArrowKeys ui box.</summary>
+    private Animator arrowKeysAnimator;
+
+    /// <summary>true if the arrow keys have popped up.</summary>
+    private bool arrowKeysUp;
+
+    [SerializeField]
     ///<summary>The input field for the name box.</summary>
     private TMP_InputField nameBoxInput;
 
@@ -34,29 +41,23 @@ public class TutorialDialogue : DialogueManager
             "In their fear of change, they vote the party of restriction and oppression.",
             "The Life Party.",
             "I, however, am President of the Death Party.",
-            "Its name is intense, yes. But we chose it for that exact reason.",
-            "It scares the 'life' out of those power-drunk Life Party politicians.",
-            "Heh.",
-            "As President, I am responsible for the progress of our cause.",
-            "TRUE freedom. Few laws. When a nation's people are unchained, they are unstoppable.",
-            "I am hopeful. Not only do I have you but also redistricting power for this upcoming election.",
+            "And I am hopeful. Not only do I have you but also redistricting power for this upcoming election.",
             "That means we can make some \"tweaks\" to Arnolica's voter maps.",
             "Here's what I need you to do. Listen carefully.",
-            "Identify our voter blocs. We are represented by dark green.",
-            "Find swappable voter blocs. You can move those against other blocs in the four primary directions.",
+            "Identify our dark green voter blocs on the map.",
+            "Find Compass blocs. You can move those against other blocs in the four primary directions.",
             "Districts are groups of blocs connected by beams.",
-            "This map has two.",
-            "Push our voters into districts such that a majority of blocs in a district are dark green.",
-            "Your job is done when a majority of this map's districts vote for the Death Party.",
+            "This map has three.",
+            "Push our voters into districts until a majority of blocs in a district are dark green.",
+            "Your job is done when a majority -- two -- of this map's districts vote for the Death Party.",
             "Good luck; I will contact you when you're finished.",
             "And put on some mosturizer, please. Your current image is a disservice to our party."
         };
 
         afterWinQuotes = new string[] {
             "Would you look at that.",
-            "Do you see what you just did?",
-            "This map used to split its voters. Half for the Life Party, half for us.",
-            "Look at it now, though. A majority of its districts vote for the Death Party.",
+            "This map used to vote for the Life Party.",
+            "Now, a majority of its districts vote for the Death Party.",
             "That means we've gained absolute control over this piece of Arnolica, thanks to you.",
             "Say, what do you call yourself?",
             "...",
@@ -67,19 +68,36 @@ public class TutorialDialogue : DialogueManager
         };
 
 
-
+        SaveManager.data.currentLevel = 0; //DELETE ME WHEN DEMO IS OVER!
         base.Start();
 
     }
 
+    protected override void Update()
+    {
+        base.Update();
+        if (arrowKeysUp && (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)
+            || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow)))
+        {
+            arrowKeysAnimator.SetTrigger("pop");
+        }
+        
+    }
+
     public override void NextQuote()
     {
+        if (OutOfCurrentQuotes())
+        {
+            arrowKeysAnimator.SetTrigger("pop");
+            arrowKeysUp = true;
+        }
+
 
         string nextQuote = NextQuoteText();
         
         switch (nextQuote)
         {
-            case "Find swappable voter blocs. You can move those against other blocs in the four primary directions.":
+            case "Find Compass blocs. You can move those against other blocs in the four primary directions.":
                 swapSquareAnimator.SetBool("pulse", true);
                 break;
             case "Say, what do you call yourself?":
@@ -92,15 +110,14 @@ public class TutorialDialogue : DialogueManager
 
                 currentQuotes = new string[] {
                     "Would you look at that.",
-                    "Do you see what you just did?",
-                    "This map used to split its voters. Half for the Life Party, half for us.",
-                    "Look at it now, though. A majority of its districts vote for the Death Party.",
+                    "This map used to vote for the Life Party.",
+                    "Now, a majority of its districts vote for the Death Party.",
                     "That means we've gained absolute control over this piece of Arnolica, thanks to you.",
                     "Say, what do you call yourself?",
                     "...",
                     "Well, not bad today, " + SaveManager.data.playerName + ".",
                     "But there is more work to be done, and there are more maps to fix.",
-                    "Indeed, this was just one district of one faction. So you best get going.",
+                    "Indeed, this was just one map of one faction. So you best get going.",
                     "We'll be in touch."
                 };
 
@@ -116,6 +133,17 @@ public class TutorialDialogue : DialogueManager
 
 
     }
+
+/*    public virtual void EnterPressed()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) && lastDialogue && OutOfCurrentQuotes())
+        {
+            NextQuote();
+            map.EndLevel();
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Return) && started) NextQuote();
+    }*/
 
     private IEnumerator NameBoxDelay()
     {
