@@ -101,6 +101,7 @@ public class DialogueManager : MonoBehaviour
     {
         if(lastDialogue && OutOfCurrentQuotes() && !ended)
         {
+            HideDialogueBox();
             map.EndLevel();
             ended = true;
             return;

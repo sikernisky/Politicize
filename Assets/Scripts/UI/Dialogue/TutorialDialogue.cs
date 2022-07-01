@@ -67,8 +67,6 @@ public class TutorialDialogue : DialogueManager
             "We'll be in touch."
         };
 
-
-        SaveManager.data.currentLevel = 0; //DELETE ME WHEN DEMO IS OVER!
         base.Start();
 
     }
@@ -133,17 +131,6 @@ public class TutorialDialogue : DialogueManager
 
 
     }
-
-/*    public virtual void EnterPressed()
-    {
-        if (Input.GetKeyDown(KeyCode.Return) && lastDialogue && OutOfCurrentQuotes())
-        {
-            NextQuote();
-            map.EndLevel();
-            return;
-        }
-        if (Input.GetKeyDown(KeyCode.Return) && started) NextQuote();
-    }*/
 
     private IEnumerator NameBoxDelay()
     {

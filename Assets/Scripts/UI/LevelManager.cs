@@ -95,8 +95,7 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     private void PauseGame()
     {
-        if (optionsMenu.enabled) Debug.Log("Game paused.");
-        else Debug.Log("Game resumed.");
+        
     }
 
     /// <summary>

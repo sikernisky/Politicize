@@ -952,7 +952,7 @@ MonoBehaviour:
   mapBackground: {fileID: 0}
   placeholderSprite: {fileID: 21300000, guid: 9d3c714ab330fb941a0d0581c896abf1, type: 3}
   placeholderParent: {fileID: 2019950331}
-  swapLimit: 55
+  swapLimit: 42
   swapLimitDisabled: 0
   swapCounterText: {fileID: 1927635035}
   districtCounterText: {fileID: 1326249640}
@@ -961,6 +961,7 @@ MonoBehaviour:
   mapNameText: {fileID: 1802808426}
   faction: Arnolica
   levelNum: 5
+  lastLevel: 0
 --- !u!4 &464278458
 Transform:
   m_ObjectHideFlags: 0

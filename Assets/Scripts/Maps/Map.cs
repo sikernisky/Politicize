@@ -83,9 +83,12 @@ public class Map : MonoBehaviour
     private string faction;
 
     [SerializeField]
-    ///<summary>Level number of this map.</summary>
+    ///<summary>Level number of this map. </summary>
     private int levelNum;
 
+    [SerializeField]
+    ///<summary>true if this Map is the last level in this Faction.</summary>
+    private bool lastLevel;
 
 
 
@@ -181,8 +184,13 @@ public class Map : MonoBehaviour
     {
         LevelManager.playable = false;
         levelOver = true;
-        SaveManager.data.IncrementLevel();
-        sceneChanger.ChangeScene(SaveManager.data.currentFaction + SaveManager.data.currentLevel.ToString());
+
+        if (lastLevel) sceneChanger.ChangeScene("LevelSelect");
+        else
+        {
+            sceneChanger.ChangeScene(SaveManager.data.currentFaction + (SaveManager.data.currentLevel + 1).ToString());
+        }
+
     }
 
     /// <summary>
@@ -301,7 +309,6 @@ public class Map : MonoBehaviour
             {
                 for (int y = mapSize / -2; y <= mapSize / 2; y++)
                 {
-                    Debug.Log(new Vector2(x, y));
                     Vector2 pos = new Vector2(x, y);
                     if (SquareByPos(pos) == null) SpawnPlaceholderTile(pos);
                 }
@@ -441,7 +448,8 @@ public class Map : MonoBehaviour
     private void SetCurrentLevel()
     {
         SaveManager.data.currentFaction = faction;
-        SaveManager.data.currentLevel = levelNum;
+        SaveManager.data.SetCurrrentLevel(levelNum);
+
     }
 
 }

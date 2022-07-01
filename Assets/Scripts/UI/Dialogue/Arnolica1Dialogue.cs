@@ -32,11 +32,6 @@ public class Arnolica1Dialogue : DialogueManager
 
     public override void Start()
     {
-        if (SaveManager.data.arnolica1DialogueCompleted)
-        {
-            Destroy(gameObject);
-            return;
-        }
 
         startQuotes = new string[] {
             "Hello again.",

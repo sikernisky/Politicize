@@ -8,15 +8,19 @@ using UnityEngine.UI;
 /// </summary>
 public class LevelSelect : MonoBehaviour
 {
-    /// <summary>The LevelBoxes under this LevelSelect.</summary>
-    private HashSet<LevelBox> boxes;
-
     [SerializeField]
-    /// <summary>The Button that "turns" the page to the new levels.</summary>
-    private Button nextPageButton;
+    ///<summary>The LevelBox for Arnolica.</summary>
+    private LevelBox arnolicaBox;
 
-    /// <summary>The page that the level boxes are on.</summary>
-    private int currentPage;
+
+    private void Update()
+    {
+        Debug.Log(Application.persistentDataPath);
+        if (Input.GetKeyDown(KeyCode.A)) SaveManager.data.Foo();
+        if (Input.GetKeyDown(KeyCode.B)) Debug.Log(SaveManager.data.IsNull());
+    }
+
+
 
     /// <summary>All factions, in order.</summary>
     private readonly List<string> allFactions = new List<string>()
@@ -26,44 +30,7 @@ public class LevelSelect : MonoBehaviour
         "Thau"
     };
 
-    private void Start()
-    {
-        GatherBoxes();
-        SaveManager.data.currentFaction = CurrentFaction();
-    }
+   
 
-    /// <summary>
-    /// Obtains all LevelBoxes under this LevelSelect.
-    /// </summary>
-    private void GatherBoxes()
-    {
-        boxes = new HashSet<LevelBox>();
-        foreach(Transform t in transform)
-        {
-            LevelBox lb = t.GetComponent<LevelBox>();
-            if (lb != null) boxes.Add(lb);
-        }
-    }
-
-    /// <summary>
-    /// Performs some action when the button to go the next page of levels
-    /// is pressed.
-    /// </summary>
-    public void ClickNextPage()
-    {
-        int increment = boxes.Count;
-        currentPage++;
-        foreach(LevelBox lb in boxes) { lb.IncrementNumber(increment); }
-        SaveManager.data.currentFaction = CurrentFaction();
-    }
-
-    /// <summary>
-    /// Returns the name of the current faction this page represents.
-    /// </summary>
-    /// <returns>The string name of the current faction this page represents.</returns>
-    public string CurrentFaction()
-    {
-        if (currentPage > allFactions.Count - 1) return "";
-        return allFactions[currentPage];
-    }
+   
 }

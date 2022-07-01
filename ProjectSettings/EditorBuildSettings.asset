@@ -53,4 +53,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Levels/Arnolica11.unity
     guid: 16fb5d50be8b3de42834032829bc9752
+  - enabled: 1
+    path: Assets/Scenes/Levels/Arnolica12.unity
+    guid: fa7754906830b1648b307ce60ba7f122
+  - enabled: 1
+    path: Assets/Scenes/Levels/Arnolica13.unity
+    guid: 6a2ecf3f4137e594dad2f6332b4a7cc8
   m_configObjects: {}
