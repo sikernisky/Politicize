@@ -29,6 +29,9 @@ public class Arnolica1Dialogue : DialogueManager
     ///<summary>Arrow for the Life Party's dialogue.</summary>
     private Sprite lifeArrow;
 
+    /// <summary>true if the delay for the actual win is over.</summary>
+    private bool delayOver;
+
 
     public override void Start()
     {
@@ -71,12 +74,13 @@ public class Arnolica1Dialogue : DialogueManager
 
     protected override void Update()
     {
-        if (onRetry && map.Won())
+        if (onRetry && map.Won() && delayOver)
         {
+            Debug.Log("Here");
             onRetry = false;
             map.EndLevel();
         }
-        else if (onRetry && map.TooManySwaps()) map.ResetMap(.1f);
+        else if (onRetry && map.TooManySwaps()) map.ResetMap();
         else base.Update();
     }
 
@@ -127,6 +131,7 @@ public class Arnolica1Dialogue : DialogueManager
                 swapCounter.SetTrigger("fadeCounterIn");
                 break;
             case "Try this again.":
+                StartCoroutine(Delay());
                 map.ResetMap();
                 map.EnableSwapLimit();
                 onRetry = true;
@@ -145,5 +150,11 @@ public class Arnolica1Dialogue : DialogueManager
     public override void ClickDialogueButton()
     {
         if (started) NextQuote();
+    }
+
+    IEnumerator Delay()
+    {
+        yield return new WaitForSeconds(1f);
+        delayOver = true;
     }
 }

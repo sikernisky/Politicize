@@ -24,6 +24,12 @@ public class Map : MonoBehaviour
     /// <summary>All Squares in this Map. </summary>
     private HashSet<Square> allSquares;
 
+    /// <summary>All Squares that started on this Map. </summary>
+    private HashSet<Square> originalSquares;
+
+    /// <summary>All Squares that are currently on this Map. </summary>
+    private HashSet<Square> activeSquares;
+
     /// <summary>true if the player has won this Map.</summary>
     private bool mapWon;
 
@@ -90,6 +96,36 @@ public class Map : MonoBehaviour
     ///<summary>true if this Map is the last level in this Faction.</summary>
     private bool lastLevel;
 
+    [SerializeField]
+    ///<summary>Animator for this Map. </summary>
+    private Animator mapAnimator;
+
+    [SerializeField]
+    ///<summary>True if this Map should pop in at the start of the scene.</summary>
+    private bool popInOnStart;
+
+    [SerializeField]
+    ///<summary>The label for this map.</summary>
+    private GameObject label;
+
+    [SerializeField]
+    ///<summary>The text component for the label.</summary>
+    private TMP_Text labelText;
+
+    [SerializeField]
+    ///<summary>The undo button.</summary>
+    private GameObject undoButton;
+
+    /// <summary>
+    /// States of the map as the player swaps.
+    /// </summary>
+    private Stack<(Dictionary<Square, Vector2Int>, Dictionary<Square, Transform>)> mapStates;
+
+    /// <summary>Number of swaps the player has left.</summary>
+    private int swapsRemaining;
+
+    /// <summary>This map's graveyard.</summary>
+    private Transform graveyard;
 
 
     private void Awake()
@@ -104,6 +140,10 @@ public class Map : MonoBehaviour
         SetupSwapCounter();
         SetupMapName();
         SetSizes();
+        PlayAnimations();
+        EnablePowerups();
+        CreateGraveyard();
+
         LevelManager.playable = true;
     }
 
@@ -114,8 +154,10 @@ public class Map : MonoBehaviour
         UpdateLevelWon();
         UpdateSwapCounter();
         UpdateDistrictCounter();
-        TryResetMap();
         if (Won() && !levelOver) OnWin();
+
+        //if (Input.GetKeyDown(KeyCode.E)) EndLevel();
+
     }
 
     /// <summary>
@@ -123,40 +165,104 @@ public class Map : MonoBehaviour
     /// </summary>
     public void ResetMap()
     {
-        foreach(Square s in allSquares)
-        {
-            s.OnReset();
-        }
+        StartCoroutine(ResetMapCoro());
+    }
+
+    private IEnumerator ResetMapCoro()
+    {
         levelOver = false;
         SwappableSquare.ResetSwapCount();
+
+        yield return new WaitForSeconds(SwappableSquare.swapLerpDuration);
+
+        if (mapStates != null) mapStates.Clear();
+
+        HashSet<Square> newAllSquares = new HashSet<Square>();
+             
+        foreach (Square s in allSquares)
+        {
+            if (!originalSquares.Contains(s))
+            {
+                Destroy(s.gameObject);
+                activeSquares.Remove(s);
+            }
+            else
+            {
+                activeSquares.Add(s);
+                newAllSquares.Add(s);
+                s.gameObject.SetActive(transform);
+                s.OnReset();
+            }
+        }
+        allSquares = newAllSquares;
     }
 
     /// <summary>
     /// Tries to reset the Map. Needs swap limit enabled.
     /// </summary>
-    private void TryResetMap()
+    public void TryResetMap()
     {
         if (swapLimitDisabled) return;
         if (Won()) return;
-        if (TooManySwaps()) ResetMap(0);
+        if (TooManySwaps()) ResetMap();
     }
+
 
     /// <summary>
-    /// Resets this map to how it started originally after some time.
+    /// Tries to undo the board.
     /// </summary>
-    /// <param name="delay">How long to wait before resetting.</param>
-    public void ResetMap(float delay)
+    public void TryUndo()
     {
-        SwappableSquare.ResetSwapCount();
-        StartCoroutine(ResetMapWithDelay(delay));
-    }
+        if (mapStates == null || mapStates.Count == 0) return;
+        if (Won()) return;
+        SwappableSquare.AddToSwapCount(1);
 
-    private IEnumerator ResetMapWithDelay(float delay)
+        foreach(Square s in allSquares)
+        {
+            if (s.Resetting()) return;
+        }
+
+        (Dictionary<Square, Vector2Int>, Dictionary<Square, Transform>) state = mapStates.Pop();
+
+
+        List<Square> allowedSquares = new List<Square>(state.Item1.Keys);
+        UndoFilter(allowedSquares);
+
+        foreach(KeyValuePair<Square, Vector2Int> pair in state.Item1)
+        {
+            Square s = pair.Key;
+            if (!s.Resetting())
+            {
+                Vector2Int pos = pair.Value; //The position of the square
+                Transform t = state.Item2[pair.Key]; //The transform of the square
+                s.gameObject.SetActive(true);
+                s.OnUndo(pos, t);
+                activeSquares.Add(s);
+                allSquares.Add(s);
+            }
+
+        }
+    }
+    
+    /// <summary>
+    /// Filters Squares such that only previous state's squares can remain on the board.
+    /// </summary>
+    /// <param name="allowedSquares">The list of squares not to destroy.</param>
+    private void UndoFilter(List<Square> allowedSquares)
     {
-        LevelManager.playable = false;
-        yield return new WaitForSeconds(delay);
-        ResetMap();
-        LevelManager.playable = true;
+        foreach(District d in districts)
+        {
+            foreach(Square s in d.DistrictSquares())
+            {
+
+                if (!allowedSquares.Contains(s))
+                {
+                    activeSquares.Remove(s);
+                    allSquares.Remove(s);
+                    Destroy(s.gameObject);
+                }
+            }
+        }
     }
 
     private void SetSizes()
@@ -185,10 +291,15 @@ public class Map : MonoBehaviour
         LevelManager.playable = false;
         levelOver = true;
 
-        if (lastLevel) sceneChanger.ChangeScene("LevelSelect");
+        if (lastLevel)
+        {
+            sceneChanger.ChangeScene("Xates0");
+            SaveManager.data.CompleteFaction(faction);
+            SaveManager.data.UnlockFaction(faction);
+        }
         else
         {
-            sceneChanger.ChangeScene(SaveManager.data.currentFaction + (SaveManager.data.currentLevel + 1).ToString());
+            sceneChanger.ChangeScene(SaveManager.data.currentFaction + (SaveManager.data.CurrentLevel() + 1).ToString());
         }
 
     }
@@ -201,6 +312,8 @@ public class Map : MonoBehaviour
     {
         districts = new HashSet<District>();
         allSquares = new HashSet<Square>();
+        originalSquares = new HashSet<Square>();
+        activeSquares = new HashSet<Square>();
         foreach(Transform t in transform)
         {
             District d = t.GetComponent<District>();
@@ -210,10 +323,50 @@ public class Map : MonoBehaviour
                 foreach(Transform tt in d.transform)
                 {
                     Square s = tt.GetComponent<Square>();
-                    if (s != null) allSquares.Add(s);
+                    if (s != null)
+                    {
+                        allSquares.Add(s);
+                        originalSquares.Add(s);
+                        activeSquares.Add(s);
+                    }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Creates the graveyard.
+    /// </summary>
+    private void CreateGraveyard()
+    {
+        GameObject gy = new GameObject("Graveyard");
+        gy.transform.SetParent(transform);
+        gy.transform.localPosition = Vector3.zero;
+        gy.transform.localScale = new Vector3(1, 1, 1);
+        graveyard = gy.transform;
+    }
+
+    /// <summary>
+    /// Sends a Square to the graveyard.
+    /// </summary>
+    /// <param name="s"></param>
+    public void BanishSquare(Square s)
+    {
+        s.transform.SetParent(graveyard);
+        activeSquares.Remove(s);
+        s.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Adds a Square to this map under a district.
+    /// </summary>
+    /// <param name="s">The Square to add.</param>
+    /// <param name="d">The district to add it to.</param>
+    public void AddSquare(Square s, District d, bool active = true)
+    {
+        allSquares.Add(s);
+        if(active) activeSquares.Add(s);
+        s.transform.SetParent(d.transform);
     }
 
     /// <summary>
@@ -232,12 +385,25 @@ public class Map : MonoBehaviour
     /// that Square doesn't exist.</returns>
     public Square SquareByPos(Vector2 squarePos)
     {
-
-        foreach (Square s in allSquares)
+        foreach (Square s in activeSquares)
         {
             if (squarePos == s.MapPosition()) return s;
         }
         return null;
+    }
+
+    /// <summary>
+    /// Returns true if a Square is in the graveyard.
+    /// </summary>
+    /// <param name="s">the square to check if in graveyard.</param>
+    /// <returns>true if s is in the graveyard.</returns>
+    private bool InGraveyard(Square s)
+    {
+        foreach(Transform t in graveyard)
+        {
+            if (t.GetComponent<Square>() == s) return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -274,7 +440,7 @@ public class Map : MonoBehaviour
         //Checking for disqualifying conditions.
 
         if (ratio <= .5) mapWon = false;
-        else if (SwappableSquare.TotalSwapsPerformed() > swapLimit && !swapLimitDisabled) mapWon = false;
+        else if (SwappableSquare.TotalSwapsPerformed() > swapLimit && SwapLimitEnabled()) mapWon = false;
         else mapWon = true;
     }
 
@@ -331,7 +497,16 @@ public class Map : MonoBehaviour
         placeHolder.transform.localPosition = position * squareSize;
 
         rend.sprite = placeholderSprite;
-        rend.sortingOrder = 1;
+        rend.sortingOrder = 0;
+    }
+
+    /// <summary>
+    /// Returns the faction of this map.
+    /// </summary>
+    /// <returns>the faction.</returns>
+    public string Faction()
+    {
+        return faction;
     }
 
     /// <summary>
@@ -341,7 +516,7 @@ public class Map : MonoBehaviour
     {
         foreach(Square s in allSquares)
         {
-            s.DisplayConnectors();
+            if(s.gameObject.activeInHierarchy) s.DisplayConnectors();
         }
     }
 
@@ -353,7 +528,10 @@ public class Map : MonoBehaviour
         foreach(District d in districts)
         {
             d.UpdateSquares();
+            d.TryLockSquares();
         }
+
+
     }
 
 
@@ -383,15 +561,34 @@ public class Map : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns true if the swap limit is enabled.
+    /// </summary>
+    /// <returns>true if the swap limit is enabled.s</returns>
+    public bool SwapLimitEnabled()
+    {
+        return !swapLimitDisabled;
+    }
+
+    /// <summary>
     /// Updates the Swap counter to display the remaining number of swaps.
     /// </summary>
     private void UpdateSwapCounter()
     {
+        swapsRemaining = swapLimit - SwappableSquare.TotalSwapsPerformed();
         if (swapLimitDisabled) return;
         if (swapCounterText == null) return;
-        swapCounterText.text = (swapLimit - SwappableSquare.TotalSwapsPerformed()).ToString();
-        if (swapLimit - SwappableSquare.TotalSwapsPerformed() <= 3) swapCounterText.color = new Color32(255, 0, 0, 255);
+        swapCounterText.text = swapsRemaining.ToString();
+        if (swapsRemaining <= 3) swapCounterText.color = new Color32(255, 0, 0, 255);
         else swapCounterText.color = new Color32(0, 0, 0, 255);
+    }
+
+    /// <summary>
+    /// Returns the number of swaps left.
+    /// </summary>
+    /// <returns>the int number of swaps left.</returns>
+    public int RemainingSwaps()
+    {
+        return swapsRemaining;
     }
 
     /// <summary>
@@ -447,8 +644,75 @@ public class Map : MonoBehaviour
     /// </summary>
     private void SetCurrentLevel()
     {
-        SaveManager.data.currentFaction = faction;
+        SaveManager.data.SetCurrentFaction(faction);
         SaveManager.data.SetCurrrentLevel(levelNum);
+
+    }
+
+    /// <summary>
+    /// Plays any animations for this map.
+    /// </summary>
+    private void PlayAnimations()
+    {
+        if (popInOnStart) mapAnimator.SetTrigger("pop");
+    }
+
+    /// <summary>
+    /// Shows the label at a Square's position.
+    /// </summary>
+    /// <param name="s">The Square to show the label at.</param>
+    public void ShowLabel(Square s)
+    {
+        if (label == null || labelText == null) return;
+        StartCoroutine(ShowLabelDelay(s));
+    }
+
+    
+    IEnumerator ShowLabelDelay(Square s)
+    {
+        yield return new WaitForSeconds(1f);
+        if (s.Hovering())
+        {
+            label.transform.position = s.transform.position;
+            label.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+            labelText.text = "Party: " + s.PoliticalParty().ToString() + "\nPopulation: " + s.Pop().ToString();
+        }
+    }
+
+    /// <summary>
+    /// Hides the label. </summary>
+    public void HideLabel()
+    {
+        if (label == null || labelText == null) return;
+        label.transform.localScale = Vector3.zero;
+    }
+
+
+    /// <summary>
+    /// Updates all positions of Squares.
+    /// </summary>
+    public void UpdatePositions()
+    {
+        if (mapStates == null) mapStates = new Stack<(Dictionary<Square, Vector2Int>, Dictionary<Square, Transform>)>();
+        Dictionary<Square, Vector2Int> prevPositions = new Dictionary<Square, Vector2Int>();
+        Dictionary<Square, Transform> prevParents = new Dictionary<Square, Transform>();
+        foreach (Square s in activeSquares)
+        {
+            prevPositions.Add(s, s.MapPosition());
+            prevParents.Add(s, s.ParentDistrict().transform);
+            s.UpdateState();
+        }
+        mapStates.Push((prevPositions, prevParents));
+    }
+
+    /// <summary>
+    /// Checks enhancements the player has and activates them.
+    /// </summary>
+    public void EnablePowerups()
+    {
+        if (SaveManager.data.moreSwaps) swapLimit = swapLimit + (int) Mathf.Round(swapLimit * .1f);
+
+        undoButton.SetActive(true);
 
     }
 

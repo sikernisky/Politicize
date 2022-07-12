@@ -17,46 +17,79 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Sandbox.unity
     guid: 56c8dbad7b3726149bd85d423ca4b6e2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Tutorial.unity
     guid: 5ccf1d4bd32cc014490739b9269ddf6d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica1.unity
     guid: d0f6d2d457fd49942a530313af3360b4
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica2.unity
     guid: bd1eea8a0d6df0f41b14900421da3e3e
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica3.unity
     guid: 11338b1f2e2169443b2f6f5df23bf3a2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica4.unity
     guid: dcea7c1f8d6a65f4a96089fb14bbd255
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica5.unity
     guid: 3123c989bd1bd5949b999b35ed481eed
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica6.unity
     guid: dc2299ebfcf8341478dd3fcc7073652c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica7.unity
     guid: 6504cae485b696143baef05b8eb7a09c
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica8.unity
     guid: c54a3ef51d583c240829b1960665bcd7
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica9.unity
     guid: 443b08ccfdc619348887c29123cca2ed
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica10.unity
     guid: bd20c2084e2495b4c95e221a75ebfeea
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica11.unity
     guid: 16fb5d50be8b3de42834032829bc9752
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica12.unity
     guid: fa7754906830b1648b307ce60ba7f122
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Levels/Arnolica13.unity
     guid: 6a2ecf3f4137e594dad2f6332b4a7cc8
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates0.unity
+    guid: 417b4043700189d4c86aec655e86e928
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates1.unity
+    guid: 95f6a61ab39b70345927cb7dd411e142
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates2.unity
+    guid: 0e59df2ed58103c4ebdbb890ac44efc7
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates3.unity
+    guid: 35e095ec74f6b484abca075b57d6edfa
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates4.unity
+    guid: 507e7c0d0aa297e43857dbc95959951e
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates5.unity
+    guid: 394d784ca1f01e744bc55799c435e624
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates6.unity
+    guid: 17dae2e9d31a9704a9527df2debb84f1
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates7.unity
+    guid: 75591a28e32db1240bbcea1a8f3d892c
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates8.unity
+    guid: 44c432f6e155a114c9657f5204857201
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates9.unity
+    guid: b8760cd7fb65a19429c2833459532908
+  - enabled: 1
+    path: Assets/Scenes/Levels/DemoEnd.unity
+    guid: eedf2c3a8db8c09429ff8a0cd1ec6e01
   m_configObjects: {}

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
+using Newtonsoft.Json;
 using System.IO;
 
 
@@ -27,9 +29,11 @@ public class SaveManager : MonoBehaviour
         Save();
     }
 
+
+
     public void Save()
     {
-        string json = JsonUtility.ToJson(data);
+        string json = JsonConvert.SerializeObject(data);
         File.WriteAllText(path, json);
     }
 
@@ -43,7 +47,7 @@ public class SaveManager : MonoBehaviour
         }
 
         string loadedData = File.ReadAllText(path);
-        data = JsonUtility.FromJson<PlayerData>(loadedData);
+        data = JsonConvert.DeserializeObject<PlayerData>(loadedData);
     }
 
 }

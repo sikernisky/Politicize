@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ArnolicaFinalDialogue : DialogueManager
 {
-  
+
 
     public override void Start()
     {

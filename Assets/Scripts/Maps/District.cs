@@ -24,10 +24,14 @@ public class District : MonoBehaviour
         UpdateSquares();
     }
 
+    private void Start()
+    {
+        TryLockSquares();
+    }
+
 
     private void Update()
     {
-        TryLockSquares();
         HighlightAll();
     }
 
@@ -123,7 +127,7 @@ public class District : MonoBehaviour
     /// <returns>true if this win condition is met, false otherwise.</returns>
     public bool WinConditionMet()
     {
-        return PercentageDeath() > .5f;
+        return PercentageDeathPopulation() > .5f;
     }
 
 
@@ -144,6 +148,28 @@ public class District : MonoBehaviour
     private float PercentageDeath()
     {
         return ((float) NumDeath() / squares.Count);
+    }
+
+    /// <summary>
+    /// Returns the percentage of Squares in this District that represent the
+    /// Death Party, with population taken into account.
+    /// </summary>
+    /// <returns>The percentage of population that represents the Death Party.</returns>
+    private float PercentageDeathPopulation()
+    {
+        squares = FindSquares();
+        int totalDeath = 0;
+        int totalAll = 0;
+
+        foreach(Square s in squares)
+        {
+            if(s.PoliticalParty() == Party.Death)
+            {
+                totalDeath += s.Pop();
+            }
+            totalAll += s.Pop();
+        }
+        return (float)totalDeath / (float)totalAll;
     }
 
     /// <summary>
@@ -181,13 +207,22 @@ public class District : MonoBehaviour
     /// <summary>
     /// Locks all Squares in this district if it has a majority.
     /// </summary>
-    private void TryLockSquares()
+    public void TryLockSquares()
     {
-        foreach(Square s in squares)
+        foreach (Square s in squares)
         {
             if (WinConditionMet()) s.LockSquare();
             else s.UnlockSquare();
         }
+    }
+
+    /// <summary>
+    /// Returns this District's Squares.
+    /// </summary>
+    /// <returns>Hashset of this District's Squares.</returns>
+    public HashSet<Square> DistrictSquares()
+    {
+        return squares;
     }
 
     

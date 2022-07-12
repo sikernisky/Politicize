@@ -27,6 +27,18 @@ public class FrozenSquare : Square
     ///<summary>Sprite representing this FrozenSquare when it is frozen and locked.</summary>
     private Sprite lockedFrozenSprite;
 
+    /// <summary>State of this Square's frozen status as it moves. </summary>
+    private Stack<bool> frozenStates;
+
+    [SerializeField]
+    ///<summary>Track for the frozen animation. </summary>
+    private Sprite[] frozenAnimationTrack;
+
+    [SerializeField]
+    ///<summary>SpriteRenderer playing the frozenAnimation.</summary>
+    private SpriteRenderer frozenAnimation;
+
+
 
     protected override void Update()
     {
@@ -38,6 +50,7 @@ public class FrozenSquare : Square
     {
         base.Start();
         if (HasAbsoluteMajority()) UnFreeze();
+        StartCoroutine(PlayFrozenAnimation());
     }
 
     public override void LockSquare(Sprite customLockedSprite = null)
@@ -87,12 +100,14 @@ public class FrozenSquare : Square
         {
             if (Locked()) SetSprite(lockedFrozenSprite);
             else SetSprite(frozenSprite);
+            
         }
         else
         {
             if (Locked()) SetSprite(lockedUnfrozenSprite);
             else SetSprite(unfrozenSprite);
-        }    
+            frozenAnimation.enabled = false;
+        }
     }
 
     private void OnAbsoluteMajority()
@@ -104,7 +119,41 @@ public class FrozenSquare : Square
     public override void OnReset()
     {
         base.OnReset();
+        if(frozenStates != null) frozenStates.Clear();
         Freeze();
+    }
+
+    public override void UpdateState()
+    {
+        base.UpdateState();
+        if (frozenStates == null) frozenStates = new Stack<bool>();
+        frozenStates.Push(currentlyFrozen);
+    }
+
+    public override void PrevState()
+    {
+        base.PrevState();
+        if (frozenStates == null || frozenStates.Count == 0) return;
+        currentlyFrozen = frozenStates.Pop();
+        
+    }
+
+    IEnumerator PlayFrozenAnimation()
+    {
+        while (currentlyFrozen)
+        {
+            frozenAnimation.enabled = true;
+            for (int i = 0; i < 5; i++)
+            {
+                frozenAnimation.sprite = frozenAnimationTrack[i];
+                yield return new WaitForSeconds(.025f);
+
+            }
+            frozenAnimation.enabled = false;
+            frozenAnimation.sprite = frozenAnimationTrack[0];
+            yield return new WaitForSeconds(Random.Range(8, 22));
+            yield return null;
+        }
     }
 
 

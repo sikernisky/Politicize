@@ -34,22 +34,18 @@ public class TutorialDialogue : DialogueManager
     {
         startQuotes = new string[] {
             "Finally, you're here.",
-            "Late, too. That's unacceptable: I'm a busy cat. Please do be on time in the future.",
-            "Your tardiness aside, my name is Regry, and I want to welcome you to Arnolica.",
+            "My name is Regry, and I want to welcome you to Arnolica.",
             "It's a beautiful faction. My favorite of the seven.",
-            "But its people... they thwart my work.",
-            "In their fear of change, they vote the party of restriction and oppression.",
-            "The Life Party.",
-            "I, however, am President of the Death Party.",
+            "But its people... they thwart my work. They vote for my political opponents.",
+            "I am President of the Death Party. The antithesis to the ruling Life Party.",
             "And I am hopeful. Not only do I have you but also redistricting power for this upcoming election.",
             "That means we can make some \"tweaks\" to Arnolica's voter maps.",
             "Here's what I need you to do. Listen carefully.",
-            "Identify our dark green voter blocs on the map.",
-            "Find Compass blocs. You can move those against other blocs in the four primary directions.",
+            "Find the Compass bloc and move it around the map.",
+            "Use it to push our voters, dark green blocs, into districts.",
             "Districts are groups of blocs connected by beams.",
-            "This map has three.",
-            "Push our voters into districts until a majority of blocs in a district are dark green.",
-            "Your job is done when a majority -- two -- of this map's districts vote for the Death Party.",
+            "We've won a district when more than half of its blocs are dark green.",
+            "And we've won the map when more than half of the districts vote for us.",
             "Good luck; I will contact you when you're finished.",
             "And put on some mosturizer, please. Your current image is a disservice to our party."
         };
@@ -95,7 +91,7 @@ public class TutorialDialogue : DialogueManager
         
         switch (nextQuote)
         {
-            case "Find Compass blocs. You can move those against other blocs in the four primary directions.":
+            case "Find the Compass bloc and move it around the map.":
                 swapSquareAnimator.SetBool("pulse", true);
                 break;
             case "Say, what do you call yourself?":
@@ -119,6 +115,9 @@ public class TutorialDialogue : DialogueManager
                     "We'll be in touch."
                 };
 
+                break;
+            case "We'll be in touch.":
+                LevelManager.playable = true;
                 break;
             default:
                 swapSquareAnimator.SetBool("pulse", false);

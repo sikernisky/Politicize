@@ -178,10 +178,6 @@ public class Square : MonoBehaviour
     private District startParentDistrict;
 
     [SerializeField]
-    ///<summary>Text component displaying this Square's population</summary>
-    private TMP_Text populationText;
-
-    [SerializeField]
     ///<summary>Sprite representing this Square when it is locked.</summary>
     private Sprite lockedSprite;
 
@@ -206,6 +202,33 @@ public class Square : MonoBehaviour
     ///<summary>true if this square starts selected.</summary>
     private bool startSelected;
 
+    [SerializeField]
+    ///<summary>The Sprite Renderer for the population plaque.</summary>
+    private SpriteRenderer populationPlaque;
+
+    [SerializeField]
+    ///<summary>The Text displaying this Square's population.</summary>
+    private TMP_Text populationText;
+
+    /// <summary>true if this Square is resetting.</summary>
+    private bool resetting;
+
+    /// <summary>Starting position for this Square when it lerp resets. </summary>
+    private Vector3 lerpResetStart;
+
+    /// <summary>Ending position for this Square when it lerp resets. </summary>
+    private Vector3 lerpResetEnd;
+
+    [SerializeField]
+    /// <summary>Animation curve for the lerp reset. </summary>
+    private AnimationCurve lerpResetCurve;
+
+    /// <summary>Duration for the lerp reset. </summary>
+    private static readonly float lerpResetDuration = .15f;
+
+    /// <summary>Time elapsed during this lerp reset.</summary>
+    private float lerpResetElapsed;
+
 
     protected virtual void Start()
     {
@@ -216,14 +239,16 @@ public class Square : MonoBehaviour
         if(!Selected()) deselectedSprite = CurrentSprite();
 
         FindParentDistrictAndMap();
-        ResetGridPosition();
+        SnapGridPosition();
+        DisplayPopulation();
     }
 
     protected virtual void Update()
     {
         TrySelectOnStart();
         UpdateDistrict();
-        DisplayPopulation();
+        LerpReset();
+        DisplayConnectors();
     }
 
     /// <summary>
@@ -257,10 +282,9 @@ public class Square : MonoBehaviour
     /// <br></br>The position is its X and Y positions multiplied by the Square size
     /// determined by its parent map.
     /// </summary>
-    private void ResetGridPosition()
+    private IEnumerator ResetGridPosition()
     {
-        xPos = startX;
-        yPos = startY;
+        SetMapPosition(startX, startY);
 
         Vector2 resetPos;
         if (parentMap.Size() % 2 == 0) resetPos = new Vector2(ParentMap().SquareSize() * (startX + .5f),
@@ -268,14 +292,49 @@ public class Square : MonoBehaviour
         else resetPos = new Vector2(ParentMap().SquareSize() * startX,
              ParentMap().SquareSize() * startY);
 
-        transform.localPosition = resetPos;
+        lerpResetStart = transform.position;
+        lerpResetEnd = resetPos;
+        lerpResetElapsed = 0;
 
-        if (sRend == null) Debug.Log(name);
-        sRend.sortingOrder = 2;
-
+        resetting = true;
         transform.SetParent(startParentDistrict.transform);
+        yield return new WaitForSeconds(lerpResetDuration);
+        ParentDistrict().TryLockSquares();
+        resetting = false;
 
+        sRend.sortingOrder = 2;
+        DisplayConnectors();
         UnlockSquare();
+    }
+
+    /// <summary>
+    /// Instantly snaps all Squares to their correct map position.
+    /// </summary>
+    private void SnapGridPosition()
+    {
+        SetMapPosition(startX, startY);
+
+        Vector2 resetPos;
+        if (parentMap.Size() % 2 == 0) resetPos = new Vector2(ParentMap().SquareSize() * (startX + .5f),
+             ParentMap().SquareSize() * (startY + .5f));
+        else resetPos = new Vector2(ParentMap().SquareSize() * startX,
+             ParentMap().SquareSize() * startY);
+
+        transform.position = resetPos;
+
+        sRend.sortingOrder = 2;
+        transform.SetParent(startParentDistrict.transform);
+        UnlockSquare();
+        DisplayConnectors();
+    }
+
+    /// <summary>
+    /// Returns true if this Square is currently resetting.
+    /// </summary>
+    /// <returns>true if this Square is currently resetting.</returns>
+    public bool Resetting()
+    {
+        return resetting;
     }
 
     /// <summary>
@@ -283,7 +342,72 @@ public class Square : MonoBehaviour
     /// </summary>
     public virtual void OnReset()
     {
-        ResetGridPosition();
+        if(!Resetting()) StartCoroutine(ResetGridPosition());
+    }
+
+    /// <summary>
+    /// Does something when this Map is "undo-ed"
+    /// </summary>
+    public virtual void OnUndo(Vector2Int position, Transform newParent, bool lerp = true)
+    {
+        
+        if (lerp) StartCoroutine(LerpUndo(position, newParent));
+        else SnapUndo(position, newParent);
+    }
+
+    private void SnapUndo(Vector2Int mapPosition, Transform newParent)
+    {
+        SetMapPosition(mapPosition.x, mapPosition.y);
+
+        Vector2 resetPos;
+        if (parentMap.Size() % 2 == 0) resetPos = new Vector2(ParentMap().SquareSize() * (mapPosition.x + .5f),
+            ParentMap().SquareSize() * (mapPosition.y + .5f));
+        else resetPos = new Vector2(ParentMap().SquareSize() * mapPosition.x,
+             ParentMap().SquareSize() * mapPosition.y);
+
+        transform.localPosition = resetPos;
+
+        sRend.sortingOrder = 2;
+
+        transform.SetParent(newParent);
+
+        DisplayConnectors();
+
+        UnlockSquare();
+
+        PrevState();
+    }
+
+    private IEnumerator LerpUndo(Vector2Int mapPosition, Transform newParent)
+    {
+        SetMapPosition(mapPosition.x, mapPosition.y);
+
+        Vector2 resetPos;
+        if (parentMap.Size() % 2 == 0) resetPos = new Vector2(ParentMap().SquareSize() * (mapPosition.x + .5f),
+            ParentMap().SquareSize() * (mapPosition.y + .5f));
+        else resetPos = new Vector2(ParentMap().SquareSize() * mapPosition.x,
+             ParentMap().SquareSize() * mapPosition.y);
+
+        lerpResetStart = transform.position;
+        lerpResetEnd = resetPos;
+        lerpResetElapsed = 0;
+
+        resetting = true;
+        transform.SetParent(newParent);
+
+        yield return new WaitForSeconds(lerpResetDuration);
+
+        ParentDistrict().TryLockSquares();
+        resetting = false;
+
+        DisplayConnectors();
+
+        UnlockSquare();
+
+        PrevState();
+
+        sRend.sortingOrder = 2;
+
     }
 
 
@@ -325,11 +449,13 @@ public class Square : MonoBehaviour
     private void OnMouseEnter()
     {
         hovering = true;
+        ParentMap().ShowLabel(this);
     }
 
     private void OnMouseExit()
     {
         hovering = false;
+        ParentMap().HideLabel();
     }
 
     /// <summary>
@@ -360,9 +486,13 @@ public class Square : MonoBehaviour
     /// </summary>
     protected virtual void Select()
     {
+        return; //Not selecting right now.
+
+
+/*
         if (selectedSprite == null) selectedSprite = CurrentSprite();
         selectedSquares.Add(this);
-        SetSprite(selectedSprite);
+        SetSprite(selectedSprite);*/
     }
 
     /// <summary>
@@ -370,8 +500,10 @@ public class Square : MonoBehaviour
     /// </summary>
     protected virtual void DeSelect()
     {
-        selectedSquares.Remove(this);
-        SetSprite(deselectedSprite);
+        return; //Not selecting right now.
+
+/*        selectedSquares.Remove(this);
+        SetSprite(deselectedSprite);*/
     }
 
     /// <summary>
@@ -418,7 +550,7 @@ public class Square : MonoBehaviour
     /// </summary>
     protected void SetSprite(Sprite s)
     {
-        sRend.sprite = s;
+        if(sRend != null) sRend.sprite = s;
     }
 
     /// <summary>
@@ -482,23 +614,27 @@ public class Square : MonoBehaviour
     }
 
     /// <summary>
+    /// Sets the Map Position of this Square.
+    /// </summary>
+    /// <param name="newPos">The new position.</param>
+    public void SetMapPosition(int newX, int newY)
+    {
+        xPos = newX;
+        yPos = newY;
+    }
+
+    /// <summary>
     /// Swaps the (x, y) positions of this Square and <c>other</c>.
     /// </summary>
     protected void SwapPositions(Square other)
     {
-        Vector3 pos1 = other.transform.position;
-        Vector3 pos2 = transform.position;
-        other.transform.position = pos2;
-        transform.position = pos1;
-
         int otherX = other.xPos;
         int otherY = other.yPos;
 
-        other.xPos = xPos;
-        other.yPos = yPos;
-        xPos = otherX;
-        yPos = otherY;
+        other.SetMapPosition(xPos, yPos);
+        SetMapPosition(otherX, otherY);
     }
+
 
     /// <summary>
     /// Returns the Party of this Square.
@@ -642,8 +778,18 @@ public class Square : MonoBehaviour
     private void DisplayPopulation()
     {
         if (population == 0) population = 1;
-        if (population == 1) populationText.text = "";
-        else populationText.text = population.ToString();
+        if (ParentMap().Faction() != "Arnolica" && population > 1)
+        {
+            populationText.text = population.ToString();
+        }
+        else
+        {
+            populationText.enabled = false;
+            populationPlaque.enabled = false;
+            
+        }
+
+
     }
 
     /// <summary>
@@ -725,6 +871,8 @@ public class Square : MonoBehaviour
     /// <returns>The Vector2 position that represents this Square when locked.</returns>
     public Vector2 LockedPosition()
     {
+        //Debug.Log((parentMap == null).ToString() + name);
+        //Debug.Log(ParentDistrict().name);
         float sub = parentMap.SquareSize() * .0625f;
 
         float newYPos;
@@ -751,7 +899,8 @@ public class Square : MonoBehaviour
     {
         if (startSelected)
         {
-            Select();
+            selectedSquares.Add(this);
+            SetSprite(selectedSprite);
             startSelected = false;
         }
     }
@@ -810,6 +959,58 @@ public class Square : MonoBehaviour
         if (s == null) return;
         unlockedSprite = s;
     }
+
+    /// <summary>
+    /// Returns this Square's population.
+    /// </summary>
+    /// <returns>integer that is this Square's population.</returns>
+    public int Pop()
+    {
+        return population;
+    }
+
+    /// <summary>
+    /// Sets this Square's population.
+    /// </summary>
+    /// <param name="pop">the population, > 0, to set to.</param>
+    public void SetPopulation(int pop)
+    {
+        if (pop < 1) pop = 1;
+        population = pop;
+    }
+
+    /// <summary>
+    /// Tracks the state of this Square as the player moves.
+    /// </summary>
+    public virtual void UpdateState()
+    {
+        //Default square does nothing.
+    }
+
+    /// <summary>
+    /// Returns this Square to its previous state.
+    /// </summary>
+    public virtual void PrevState()
+    {
+        //Default square does nothing.
+    }
+
+    /// <summary>
+    /// Resets this Square to its starting position via a Lerp.
+    /// </summary>
+    private void LerpReset()
+    {
+        if (resetting)
+        {
+            lerpResetElapsed += Time.deltaTime;
+            float percentComplete = lerpResetElapsed / lerpResetDuration;
+            transform.position = Vector3.Lerp(lerpResetStart, lerpResetEnd, lerpResetCurve.Evaluate(percentComplete));
+        }
+    }
+
+
+
+
 
 
 

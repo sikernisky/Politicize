@@ -40,6 +40,6 @@ public class ResetArrow : MonoBehaviour
     private void TryUndo()
     {
         if (!isUndo) return;
-        //undo code, add here later.
+        map.TryUndo();
     }
 }

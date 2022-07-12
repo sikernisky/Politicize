@@ -15,9 +15,26 @@ public class LevelSelect : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(Application.persistentDataPath);
-        if (Input.GetKeyDown(KeyCode.A)) SaveManager.data.Foo();
-        if (Input.GetKeyDown(KeyCode.B)) Debug.Log(SaveManager.data.IsNull());
+
+    }
+
+
+    /// <summary>
+    /// Returns the faction that should be pulsing in level select.
+    /// </summary>
+    /// <returns>the string name of the faction.</returns>
+    public static string FactionToPulse()
+    {
+        if (SaveManager.data.Completed("Xates"))
+        {
+            return "";
+        }
+        if (SaveManager.data.Completed("Arnolica"))
+        {
+            return "Xates";
+        }
+        return "Arnolica";
+
     }
 
 
