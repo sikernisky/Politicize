@@ -29,8 +29,6 @@ public class SaveManager : MonoBehaviour
         Save();
     }
 
-
-
     public void Save()
     {
         string json = JsonConvert.SerializeObject(data);
@@ -47,7 +45,14 @@ public class SaveManager : MonoBehaviour
         }
 
         string loadedData = File.ReadAllText(path);
-        data = JsonConvert.DeserializeObject<PlayerData>(loadedData);
+        PlayerData convertedData = JsonConvert.DeserializeObject<PlayerData>(loadedData);
+        if (convertedData == null)
+        {
+            data = new PlayerData();
+            Save();
+            return;
+        }
+        else data = convertedData;
     }
 
 }

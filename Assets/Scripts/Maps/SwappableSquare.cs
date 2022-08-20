@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 
 /// <summary>
@@ -11,6 +12,18 @@ public class SwappableSquare : Square
 {
     /// <summary>Number of swaps made by all SwappableSquares.</summary>
     private static int totalSwapsMade;
+
+    /// <summary>Number of arrow key presses that have swapped SwappableSquares.</summary>
+    private static int currentSwapCount;
+
+    [SerializeField]
+    ///<summary>The number of swaps this SwappableSquare is allowed this level.
+    /// A value of -1 represents an infinite amount.
+    /// </summary>
+    private int swapsLeft = -1;
+
+    /// <summary>How many swaps this SwappableSquare had left to swap with at the start.</summary>
+    private int startingSwapsLeft;
 
     /// <summary>Number of swaps made by this SwappableSquare.</summary>
     private int swapsMade;
@@ -47,42 +60,65 @@ public class SwappableSquare : Square
     /// <summary>The curve for this lerp swap.</summary>
     private AnimationCurve lerpCurve;
 
-    /// <summary>The next direction to move to after the current one. </summary>
-    private List<Direction> queuedSwap = new List<Direction>();
+    /// <summary>true if this SwappableSquare has been swapped.</summary>
+    private bool swapped;
 
+    [SerializeField]
+    ///<summary>Text component displaying how many swaps this SwappableSquare has left. </summary>
+    private TMP_Text swapText;
+
+    [SerializeField]
+    ///<summary>The background for the swaps left text component. </summary>
+    private SpriteRenderer swapTextPlaque;
+
+    /// <summary>How many swaps  </summary>
+    private Stack<int> swapCounts;
+
+
+    protected override void Start()
+    {
+        base.Start();
+        SetupIndividualSwapCounter();
+    }
 
     protected override void Update()
     {
         base.Update();
-        TrySwap();
         LerpSwap();
+        UpdateIndividualSwapCounter();
     }
 
     /// <summary>
-    /// Swaps this SwappableSquare.
+    /// Returns true and swaps this SwappableSquare if possible, otherwise returns false.
     /// </summary>
-    /// <param name="d">A Direction.</param>
-    /// <returns>Nothing.</returns>
-    private void Swap(Direction d)
+    /// <param name="d">The direction to swap.</param>
+    /// <returns>true if this SwappableSquare swapped, false otherwise..</returns>
+    public bool Swap(Direction d)
     {
         Square target = Neighbor(d);
-        if (target == null || !target.CanSwapWith()) return;
-        if (Resetting() || target.Resetting()) return;
-        if (ParentMap().RemainingSwaps() == 0 && ParentMap().SwapLimitEnabled()) return;
-        if (lerping)
-        {
-            if (queuedSwap.Count == 0) queuedSwap.Add(d);
-            return;
-        }
+        if (target == null || !target.CanSwapWith() || !CanSwap()) return false;
+        if (Resetting() || target.Resetting()) return false;
+        if (ParentMap().RemainingSwaps() == 0 && ParentMap().SwapLimitEnabled()) return false;
+        if (lerping) return false;
+        if (!Selected()) return false;
+        if (ParentMap().Banished(this)) return false;
+        if (!isActiveAndEnabled) return false;
+       
+        ParentDistrict().UnlockAllSquares();
+        target.ParentDistrict().UnlockAllSquares();
 
-        ParentMap().UpdatePositions();
-
+        target.OnSwap();
         StartCoroutine(StartLerpSwap(target));
-        SwapPositions(target);
         SwapDistricts(target);
+        SwapPositions(target);
 
         swapsMade++;
-        totalSwapsMade++;
+        DecrementIndividualSwapCounter();
+        SwappableSquare ssTarget = target as SwappableSquare;
+        if (ssTarget != null) ssTarget.DecrementIndividualSwapCounter();
+        
+      
+        return true;
     }
 
     private IEnumerator StartLerpSwap(Square other)
@@ -99,10 +135,10 @@ public class SwappableSquare : Square
 
         lerping = true;
 
+        FindObjectOfType<AudioManager>().Play("Swap");
+
         yield return new WaitForSeconds(swapLerpDuration);
-
         AfterLerp(other);
-
     }
 
     /// <summary>
@@ -110,22 +146,10 @@ public class SwappableSquare : Square
     /// </summary>
     private void AfterLerp(Square other)
     {
-
         lerping = false;
+        other.AfterSwap();
+
         ParentMap().TryResetMap();
-        ParentDistrict().TryLockSquares();
-        other.ParentDistrict().TryLockSquares();
-
-        if (Locked()) transform.localPosition = LockedPosition();
-        else transform.localPosition = UnlockedPosition();
-        if (other.Locked()) other.transform.localPosition = other.LockedPosition();
-        else other.transform.localPosition = other.UnlockedPosition();
-
-        if (queuedSwap.Count == 1)
-        {
-            Swap(queuedSwap[0]);
-            queuedSwap.RemoveAt(0);
-        }
     }
 
     /// <summary>
@@ -142,46 +166,20 @@ public class SwappableSquare : Square
         }
     }
 
-
-    /// <summary>
-    /// Swaps this Square if possible.
-    /// </summary>
-    private void TrySwap()
+    private void OnMouseDown()
     {
-        if (!LevelManager.playable) return;
-        if (Input.GetKeyDown("up")) Swap(Direction.Up);
-        if (Input.GetKeyDown("down")) Swap(Direction.Down);
-        if (Input.GetKeyDown("left")) Swap(Direction.Left);
-        if (Input.GetKeyDown("right")) Swap(Direction.Right);
-        
+        Select();
     }
 
-    /// <summary>
-    /// Returns the number of swaps made by all SwappableSquares across all Maps.
-    /// </summary>
-    /// <returns>the number of swaps made by all SwappableSquares across all Maps.</returns>
-    public static int TotalSwapsPerformed()
-    {
-        return totalSwapsMade;
-    }
+
 
     /// <summary>
-    /// Changes the SwappableSquare swap count to zero.
-    /// 
-    /// Does NOT affect individual Squares' swap count.
+    /// Returns true if this SwappableSquare is lerping.
     /// </summary>
-    public static void ResetSwapCount()
+    /// <returns>true if this SwappableSquare is lerping, false otherwise.</returns>
+    public bool Lerping()
     {
-        totalSwapsMade = 0;
-    }
-
-    /// <summary>
-    /// Adds to the swap count.
-    /// </summary>
-    /// <param name="amount">The number of swaps to add.</param>
-    public static void AddToSwapCount(int amount)
-    {
-        totalSwapsMade -= amount;
+        return lerping;
     }
 
     /// <summary>
@@ -192,6 +190,72 @@ public class SwappableSquare : Square
     {
         return swapsMade;
     }
+
+    /// <summary>
+    /// Updates this SwappableSquare's swap counter.
+    /// </summary>
+    private void UpdateIndividualSwapCounter()
+    {
+        if (swapsLeft != -1) swapText.text = swapsLeft.ToString();
+    }
+
+    /// <summary>
+    /// Sets up this SwappableSquare's swap counter.
+    /// </summary>
+    private void SetupIndividualSwapCounter()
+    {
+        startingSwapsLeft = swapsLeft;
+        if (swapsLeft < 0)
+        {
+            swapText.enabled = false;
+            swapTextPlaque.enabled = false;
+        }
+        else
+        {
+            swapText.text = swapsLeft.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Adds to this SwappableSquare's swap counter.
+    /// </summary>
+    /// <param name="amount">The amount to add, > 0. </param>
+    private void IncrementIndividualSwapCounter(int amount = 1)
+    {
+        if (amount < 0 || swapsLeft < 0) return;
+        swapsLeft += amount;
+    }
+
+
+    /// <summary>
+    /// Adds to this SwappableSquare's swap counter.
+    /// </summary>
+    /// <param name="amount">The amount to subtract, > 0. Must not make the number
+    /// of remaining swaps to be less than zero. </param>
+    private void DecrementIndividualSwapCounter(int amount = 1)
+    {
+        if (amount < 0 || swapsLeft < 0) return;
+        swapsLeft = Mathf.Max(0, swapsLeft - amount);
+        if (swapsLeft == 0) FindObjectOfType<AudioManager>().Play("OutSwaps");
+    }
+
+    /// <summary>
+    /// Sets this SwappableSquare's swap limit to what it was originally.
+    /// </summary>
+    public void ResetIndividualSwapCounter()
+    {
+        swapsLeft = startingSwapsLeft;
+    }
+
+    /// <summary>
+    /// Returns the number of swaps this SwappableSquare has left.
+    /// </summary>
+    /// <returns>the integer number of swaps this SwappableSquare has left.</returns>
+    public int IndividualSwapsLeft()
+    {
+        return swapsLeft;
+    }
+
 
     public override void LockSquare(Sprite customLockedSprite = null)
     {
@@ -205,10 +269,69 @@ public class SwappableSquare : Square
         else base.UnlockSquare();
     }
 
-    public override void OnReset()
+    public override void DeSelect()
     {
-        if (queuedSwap.Count == 1) queuedSwap.RemoveAt(0);
-        base.OnReset();
+        return;
     }
+
+    public override void Select()
+    {
+        
+        base.Select();
+    }
+
+    public override void OnReset(bool lerp = true)
+    {
+        base.OnReset();
+        lerping = false;
+        ResetIndividualSwapCounter();
+        if (swapCounts != null) swapCounts.Clear();
+    }
+
+    public override void OnUndo(Vector2Int position, Transform newParent, bool lerp = true)
+    {
+        base.OnUndo(position, newParent, lerp);
+        lerping = false;
+    }
+
+    /// <summary>
+    /// Returns true if this SwappableSquare can swap with something.
+    /// </summary>
+    /// <returns>true if this SwappableSquare can swap with something, false otherwise.</returns>
+    private bool CanSwap()
+    {
+        return swapsLeft != 0;
+    }
+
+    public override void PrevState()
+    {
+        base.PrevState();
+        if (swapCounts == null || swapCounts.Count == 0) return;
+        int prevCount = swapCounts.Pop();
+        IncrementIndividualSwapCounter(prevCount - IndividualSwapsLeft());
+    }
+
+    public override void UpdateState()
+    {
+        base.UpdateState();
+        if (swapCounts == null) swapCounts = new Stack<int>();
+        swapCounts.Push(IndividualSwapsLeft());
+    }
+
+    public override void OnBanish()
+    {
+        lerping = false;
+        base.OnBanish();
+    }
+
+    public override GameObject ConvertParty(bool playSound = true, GameObject customConversion = null)
+    {
+        SwappableSquare convertedSwap = base.ConvertParty(playSound, customConversion).GetComponent<SwappableSquare>();
+        convertedSwap.Select();
+        return convertedSwap.gameObject;
+
+    }
+
+
 
 }

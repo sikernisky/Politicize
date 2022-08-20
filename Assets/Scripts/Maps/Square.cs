@@ -15,7 +15,8 @@ public enum Direction
     TopRight,
     BotRight,
     Up,
-    Down
+    Down,
+    Null
 }
 
 /// <summary>
@@ -47,8 +48,8 @@ public class Square : MonoBehaviour
     /// <summary>This Square's SpriteRenderer. </summary>
     private SpriteRenderer sRend;
 
-    /// <summary>The Squares selected. </summary>
-    protected static HashSet<Square> selectedSquares;
+    /// <summary>The Square selected. </summary>
+    protected static List<Square> selectedSquares = new List<Square>();
 
     [SerializeField]
     /// <summary>The X position of this Square.</summary>
@@ -66,11 +67,9 @@ public class Square : MonoBehaviour
     /// <summary>The left connector of this Square.</summary>
     private SpriteRenderer leftConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked left connector.</summary>
     private Sprite lockedLeftConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the unlocked left connector.</summary>
     private Sprite unlockedLeftConnector;
 
@@ -78,11 +77,9 @@ public class Square : MonoBehaviour
     /// <summary>The right connector of this Square.</summary>
     private SpriteRenderer rightConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked right connector.</summary>
     private Sprite lockedRightConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked right connector.</summary>
     private Sprite unlockedRightConnector;
 
@@ -90,11 +87,9 @@ public class Square : MonoBehaviour
     /// <summary>The top connector of this Square.</summary>
     private SpriteRenderer topConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked top connector.</summary>
     private Sprite lockedTopConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked top connector.</summary>
     private Sprite unlockedTopConnector;
 
@@ -102,11 +97,9 @@ public class Square : MonoBehaviour
     /// <summary>The bot connector of this Square.</summary>
     private SpriteRenderer botConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked bot connector.</summary>
     private Sprite lockedBotConnector;
 
-    [SerializeField]
     ///<summary>The Sprite for the locked bot connector.</summary>
     private Sprite unlockedBotConnector;
 
@@ -114,11 +107,9 @@ public class Square : MonoBehaviour
     /// <summary>The top left connector of this Square.</summary>
     private SpriteRenderer topLeftConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the locked top left connector.</summary>
     private Sprite lockedTopLeftConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the unlocked top left connector.</summary>
     private Sprite unlockedTopLeftConnector;
 
@@ -126,11 +117,9 @@ public class Square : MonoBehaviour
     /// <summary>The top right connector of this Square.</summary>
     private SpriteRenderer topRightConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the locked top right connector.</summary>
     private Sprite lockedTopRightConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the unlocked top right connector.</summary>
     private Sprite unlockedTopRightConnector;
 
@@ -138,11 +127,9 @@ public class Square : MonoBehaviour
     /// <summary>The bot left connector of this Square.</summary>
     private SpriteRenderer botLeftConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the locked bot left connector.</summary>
     private Sprite lockedBotLeftConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the unlocked bot left connector.</summary>
     private Sprite unlockedBotLeftConnector;
 
@@ -150,11 +137,9 @@ public class Square : MonoBehaviour
     /// <summary>The bot right connector of this Square.</summary>
     private SpriteRenderer botRightConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the locked bot right connector.</summary>
     private Sprite lockedBotRightConnector;
 
-    [SerializeField]
     /// <summary>The Sprite for the unlocked bot right connector.</summary>
     private Sprite unlockedBotRightConnector;
 
@@ -199,12 +184,12 @@ public class Square : MonoBehaviour
     private bool locked;
 
     [SerializeField]
-    ///<summary>true if this square starts selected.</summary>
-    private bool startSelected;
-
-    [SerializeField]
     ///<summary>The Sprite Renderer for the population plaque.</summary>
     private SpriteRenderer populationPlaque;
+
+    [SerializeField]
+    ///<summary>The Sprite Renderer for the population icon.</summary>
+    private SpriteRenderer populationIcon;
 
     [SerializeField]
     ///<summary>The Text displaying this Square's population.</summary>
@@ -229,34 +214,83 @@ public class Square : MonoBehaviour
     /// <summary>Time elapsed during this lerp reset.</summary>
     private float lerpResetElapsed;
 
+    [SerializeField]
+    /// <summary>This Square as its opposite party. </summary>
+    private GameObject oppositePrefab;
+
+
+    protected virtual void Awake()
+    {
+        LoadConnectorSprites();
+    }
 
     protected virtual void Start()
     {
         SetupSprites();
-        selectedSquares = new HashSet<Square>();
-        startX = xPos;
-        startY = yPos;
+        SetStartPositions();
         if(!Selected()) deselectedSprite = CurrentSprite();
 
-        FindParentDistrictAndMap();
         SnapGridPosition();
         DisplayPopulation();
     }
 
     protected virtual void Update()
     {
-        TrySelectOnStart();
         UpdateDistrict();
         LerpReset();
         DisplayConnectors();
+
+        if (name == "tester")
+        {
+            if (transform.position.x < 0 && transform.position.y < 0)
+            {
+                Debug.LogError("not right");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Loads all connector Sprites into this Square.
+    /// </summary>
+    private void LoadConnectorSprites()
+    {
+        lockedLeftConnector = Resources.Load<Sprite>("Connectors/Locked/LockedLeftConnector");
+        lockedTopLeftConnector = Resources.Load<Sprite>("Connectors/Locked/LockedTopLeftConnector");
+        lockedBotLeftConnector = Resources.Load<Sprite>("Connectors/Locked/LockedBotLeftConnector");
+        lockedRightConnector = Resources.Load<Sprite>("Connectors/Locked/LockedRightConnector");
+        lockedTopRightConnector = Resources.Load<Sprite>("Connectors/Locked/LockedTopRightConnector");
+        lockedBotRightConnector = Resources.Load<Sprite>("Connectors/Locked/LockedBotRightConnector");
+        lockedTopConnector = Resources.Load<Sprite>("Connectors/Locked/LockedTopConnector");
+        lockedBotConnector = Resources.Load<Sprite>("Connectors/Locked/LockedBotConnector");
+
+        unlockedLeftConnector = Resources.Load<Sprite>("Connectors/Unlocked/LeftConnector");
+        unlockedTopLeftConnector = Resources.Load<Sprite>("Connectors/Unlocked/TopLeftConnector");
+        unlockedBotLeftConnector = Resources.Load<Sprite>("Connectors/Unlocked/BotLeftConnector");
+        unlockedRightConnector = Resources.Load<Sprite>("Connectors/Unlocked/RightConnector");
+        unlockedTopRightConnector = Resources.Load<Sprite>("Connectors/Unlocked/TopRightConnector");
+        unlockedBotRightConnector = Resources.Load<Sprite>("Connectors/Unlocked/BotRightConnector");
+        unlockedTopConnector = Resources.Load<Sprite>("Connectors/Unlocked/TopConnector");
+        unlockedBotConnector = Resources.Load<Sprite>("Connectors/Unlocked/BotConnector");
+
+
+    }
+
+    /// <summary>
+    /// Sets the starting map position for this Square.
+    /// </summary>
+    private void SetStartPositions()
+    {
+        startX = xPos;
+        startY = yPos;
     }
 
     /// <summary>
     /// Tries to set this Square's parent Map and District to the Map and District it is a child of.
     /// If it can't, sets to null instead.
     /// </summary>
-    private void FindParentDistrictAndMap()
+    public void FindParentDistrictAndMap()
     {
+        if (transform.parent == null) Debug.Log(name);
         District d = transform.parent.GetComponent<District>();
         parentDistrict = d;
 
@@ -298,13 +332,15 @@ public class Square : MonoBehaviour
 
         resetting = true;
         transform.SetParent(startParentDistrict.transform);
-        yield return new WaitForSeconds(lerpResetDuration);
-        ParentDistrict().TryLockSquares();
+        yield return new WaitForSeconds(lerpResetDuration +.1f);
         resetting = false;
 
-        sRend.sortingOrder = 2;
         DisplayConnectors();
-        UnlockSquare();
+
+        ParentDistrict().TryLockSquares();
+
+
+        sRend.sortingOrder = 2;
     }
 
     /// <summary>
@@ -324,8 +360,12 @@ public class Square : MonoBehaviour
 
         sRend.sortingOrder = 2;
         transform.SetParent(startParentDistrict.transform);
+
         UnlockSquare();
+
         DisplayConnectors();
+
+        ParentDistrict().TryLockSquares();
     }
 
     /// <summary>
@@ -340,9 +380,19 @@ public class Square : MonoBehaviour
     /// <summary>
     /// Does something when this map is reset.
     /// </summary>
-    public virtual void OnReset()
+    public virtual void OnReset(bool lerp = true)
     {
-        if(!Resetting()) StartCoroutine(ResetGridPosition());
+        if (!Resetting()) 
+        {
+            UnlockSquare();
+            if (ParentMap().Banished(this))
+            {
+                SnapGridPosition();
+                
+                squareAnim.SetTrigger("fadeIn");
+            }
+            else if (lerp) StartCoroutine(ResetGridPosition());
+        }
     }
 
     /// <summary>
@@ -350,10 +400,16 @@ public class Square : MonoBehaviour
     /// </summary>
     public virtual void OnUndo(Vector2Int position, Transform newParent, bool lerp = true)
     {
-        
-        if (lerp) StartCoroutine(LerpUndo(position, newParent));
+        UnlockSquare();
+        if (ParentMap().Banished(this))
+        {
+            SnapUndo(position, newParent);
+            squareAnim.SetTrigger("fadeIn");
+        }
+        else if (lerp) StartCoroutine(LerpUndo(position, newParent));
         else SnapUndo(position, newParent);
     }
+
 
     private void SnapUndo(Vector2Int mapPosition, Transform newParent)
     {
@@ -397,51 +453,24 @@ public class Square : MonoBehaviour
 
         yield return new WaitForSeconds(lerpResetDuration);
 
-        ParentDistrict().TryLockSquares();
         resetting = false;
 
         DisplayConnectors();
 
-        UnlockSquare();
-
         PrevState();
+
+        ParentDistrict().TryLockSquares();
 
         sRend.sortingOrder = 2;
 
     }
 
 
-    private void OnMouseDown()
-    {
-        DetermineSelection();
-    }
-
-
-    /// <summary>
-    /// Performs some action based on what Squares are selected.
-    /// </summary>
-    private void DetermineSelection()
-    {
-        if (!LevelManager.playable) return;
-        if (selectedSquares.Count == 0) Select();
-        else if (Selected()) DeSelect();
-        else
-        {
-            Square selectedSquare = null;
-            foreach (Square s in selectedSquares)
-            {
-                selectedSquare = s;
-            }
-            selectedSquare.DeSelect();
-            Select();
-        }
-    }
-
     /// <summary>
     /// Returns true if this Square is selected.
     /// </summary>
     /// <returns>true if this Square is selected, false otherwise.</returns>
-    protected bool Selected()
+    public bool Selected()
     {
         return selectedSquares.Contains(this);
     }
@@ -473,38 +502,40 @@ public class Square : MonoBehaviour
     /// <param name="other">A Square.</param>
     public void SwapDistricts(Square other)
     {
-        District otherDistrict = other.parentDistrict;
-        other.parentDistrict = parentDistrict;
-        parentDistrict = otherDistrict;
+        District holderParent = ParentDistrict();
+        District otherParent = other.ParentDistrict();
 
-        transform.SetParent(parentDistrict.transform);
-        other.transform.SetParent(other.parentDistrict.transform);
+        holderParent.RemoveSquare(this);
+        holderParent.AddSquare(other);
+        otherParent.RemoveSquare(other);
+        otherParent.AddSquare(this);
+
+        other.parentDistrict = holderParent;
+        parentDistrict = otherParent;
     }
 
     /// <summary>
-    /// Selects this Square if possible.
+    /// Selects this Square.
     /// </summary>
-    protected virtual void Select()
+    public virtual void Select()
     {
-        return; //Not selecting right now.
+        if (Selected()) return;
 
-
-/*
-        if (selectedSprite == null) selectedSprite = CurrentSprite();
         selectedSquares.Add(this);
-        SetSprite(selectedSprite);*/
+        SetSprite(selectedSprite);
     }
 
     /// <summary>
-    /// Deselects this Square if possible.
+    /// Deselects this Square.
     /// </summary>
-    protected virtual void DeSelect()
+    public virtual void DeSelect()
     {
-        return; //Not selecting right now.
-
-/*        selectedSquares.Remove(this);
-        SetSprite(deselectedSprite);*/
+        if (!Selected()) return;
+        if (selectedSquares.Count == 1) return;
+        selectedSquares.Remove(this);
+        SetSprite(deselectedSprite);
     }
+
 
     /// <summary>
     /// Highlights this Square a DARK color ("a dark highlight")
@@ -550,7 +581,8 @@ public class Square : MonoBehaviour
     /// </summary>
     protected void SetSprite(Sprite s)
     {
-        if(sRend != null) sRend.sprite = s;
+        if (sRend == null) sRend = GetComponent<SpriteRenderer>();
+        if(sRend != null && s != null) sRend.sprite = s;
     }
 
     /// <summary>
@@ -624,13 +656,24 @@ public class Square : MonoBehaviour
     }
 
     /// <summary>
+    /// Changes this Square's parent district.
+    /// </summary>
+    /// <param name="d">The new district.</param>
+    public void SetParentDistrict(District d)
+    {
+        if (d == ParentDistrict()) return;
+        ParentDistrict().RemoveSquare(this);
+        d.AddSquare(this);
+        parentDistrict = d;
+    }
+
+    /// <summary>
     /// Swaps the (x, y) positions of this Square and <c>other</c>.
     /// </summary>
     protected void SwapPositions(Square other)
     {
         int otherX = other.xPos;
         int otherY = other.yPos;
-
         other.SetMapPosition(xPos, yPos);
         SetMapPosition(otherX, otherY);
     }
@@ -640,10 +683,12 @@ public class Square : MonoBehaviour
     /// Returns the Party of this Square.
     /// </summary>
     /// <returns>The Party enum of this Square.</returns>
-    public Party PoliticalParty()
+    public virtual Party PoliticalParty()
     {
         return party;
     }
+
+ 
 
 
     /// <summary>
@@ -775,7 +820,7 @@ public class Square : MonoBehaviour
     /// <summary>
     /// Displays this Square's population.
     /// </summary>
-    private void DisplayPopulation()
+    protected virtual void DisplayPopulation()
     {
         if (population == 0) population = 1;
         if (ParentMap().Faction() != "Arnolica" && population > 1)
@@ -786,7 +831,7 @@ public class Square : MonoBehaviour
         {
             populationText.enabled = false;
             populationPlaque.enabled = false;
-            
+            populationIcon.enabled = false;
         }
 
 
@@ -871,13 +916,14 @@ public class Square : MonoBehaviour
     /// <returns>The Vector2 position that represents this Square when locked.</returns>
     public Vector2 LockedPosition()
     {
-        //Debug.Log((parentMap == null).ToString() + name);
-        //Debug.Log(ParentDistrict().name);
+
+
         float sub = parentMap.SquareSize() * .0625f;
 
         float newYPos;
         if(parentMap.Size() % 2 == 0) newYPos = (yPos + .5f) * parentMap.SquareSize() - sub;
         else newYPos = yPos * parentMap.SquareSize() - sub;
+
         return new Vector2(transform.localPosition.x, newYPos);
     }
 
@@ -892,26 +938,24 @@ public class Square : MonoBehaviour
         return new Vector2(transform.localPosition.x, yPos * parentMap.SquareSize());
     }
 
-    /// <summary>
-    /// Tries to select this Square on start.
-    /// </summary>
-    private void TrySelectOnStart()
-    {
-        if (startSelected)
-        {
-            selectedSquares.Add(this);
-            SetSprite(selectedSprite);
-            startSelected = false;
-        }
-    }
 
     /// <summary>
-    /// Returns true if this Square is in a district with an absolute majority of its Party type.
+    /// Returns true if this Square is in a district with an absolute (100%) majority of its Party type.
     /// </summary>
     /// <returns>true or false depending on if it is in an absolute majority.</returns>
     protected bool HasAbsoluteMajority()
     {
-        return parentDistrict.AbsoluteMajority();
+        return ParentDistrict().AbsoluteMajority();
+    }
+
+
+    /// <summary>
+    /// Returns true if this Square is in a district with a simple (>= 50%) majority of its Party type.
+    /// </summary>
+    /// <returns>true or false depending on if it is in a simple majority.</returns>
+    protected bool HasSimpleMajority()
+    {
+        return ParentDistrict().SimpleMajority();
     }
 
     /// <summary>
@@ -964,7 +1008,7 @@ public class Square : MonoBehaviour
     /// Returns this Square's population.
     /// </summary>
     /// <returns>integer that is this Square's population.</returns>
-    public int Pop()
+    public virtual int Pop()
     {
         return population;
     }
@@ -1007,6 +1051,66 @@ public class Square : MonoBehaviour
             transform.position = Vector3.Lerp(lerpResetStart, lerpResetEnd, lerpResetCurve.Evaluate(percentComplete));
         }
     }
+
+    /// <summary>
+    /// Does something when this Square is swapped by a SwappableSquare.
+    /// </summary>
+    public virtual void AfterSwap()
+    {
+        return;
+    }
+
+
+    /// <summary>
+    /// Does something when this Square is swapped.
+    /// </summary>
+    public virtual void OnSwap()
+    {
+        return;
+    }
+
+    /// <summary>
+    /// Does something when this Square is banished.
+    /// </summary>
+    public virtual void OnBanish()
+    {
+        return;
+    }
+
+    /// <summary>
+    /// Converts this Square to a Life Party or Death Party bloc.
+    /// </summary>
+    /// <param name="newBloc">Which bloc to convert to.</param>
+    /// <returns>The new Square. </returns>
+    public virtual GameObject ConvertParty(bool playSound = true, GameObject customConversion = null)
+    {
+        GameObject instantiated;
+        if (customConversion == null) instantiated = Instantiate(oppositePrefab);
+        else instantiated = Instantiate(customConversion);
+
+        if (playSound) FindObjectOfType<AudioManager>().Play("Convert");
+        ParentMap().AddSquare(instantiated.GetComponent<Square>(), transform.parent.GetComponent<District>());
+        transform.position = transform.position;
+        instantiated.GetComponent<Square>().SetMapPosition(MapPosition().x, MapPosition().y);
+        instantiated.GetComponent<Square>().SetPopulation(Pop());
+        instantiated.transform.localScale = transform.localScale;
+        instantiated.GetComponent<SpriteRenderer>().sortingOrder = GetComponent<SpriteRenderer>().sortingOrder;
+        instantiated.GetComponent<Animator>().SetTrigger("fadeIn");
+        ParentMap().BanishSquare(this);
+        return instantiated;
+    }
+
+    /// <summary>
+    /// Sets this Square's party.
+    /// </summary>
+    /// <param name="newParty">The party to set to.</param>
+    protected void SetParty(Party newParty)
+    {
+        party = newParty;
+    }
+
+
+
 
 
 

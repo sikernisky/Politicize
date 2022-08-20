@@ -132,7 +132,7 @@ public class Arnolica1Dialogue : DialogueManager
                 break;
             case "Try this again.":
                 StartCoroutine(Delay());
-                map.ResetMap();
+                map.ForceResetMap();
                 map.EnableSwapLimit();
                 onRetry = true;
                 break;

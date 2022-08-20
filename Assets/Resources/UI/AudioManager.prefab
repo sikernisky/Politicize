@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2149512042084960243
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2149512042084960245}
+  - component: {fileID: 2149512042084960242}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2149512042084960245
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149512042084960243}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1140.9318, y: 868.8296, z: -142.45741}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2149512042084960242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149512042084960243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f95471196ea7041bac522b24f2fde0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - audioClip: {fileID: 8300000, guid: 6314c27dfd30598449cc2c1b7237120b, type: 3}
+    audioName: WinLevel
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: 6e514fb11622c9f4aa02d70d6ca265ee, type: 3}
+    audioName: Swap
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: 8befe628ba410204d8c2abd24e460cd0, type: 3}
+    audioName: IceBreak
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: 199988086c972d442b940f3aa4ee25f9, type: 3}
+    audioName: Reset
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: a5950a539d5be8e49833613681fe80b0, type: 3}
+    audioName: Undo
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: c7f954fa7c43c994d984fb20743990e4, type: 3}
+    audioName: DialogueNext
+    startVol: 1
+    startSkip: 0.05
+  - audioClip: {fileID: 8300000, guid: c318193394ae23b46848fcc2430a6bbb, type: 3}
+    audioName: RegrySpeak
+    startVol: 1
+    startSkip: 0.1
+  - audioClip: {fileID: 8300000, guid: 9c1ac653227e3de498ea0c6238ee61ed, type: 3}
+    audioName: Convert
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: d598e31ed1a060f4998b01691bfd80c9, type: 3}
+    audioName: Explode
+    startVol: 1
+    startSkip: 0.25
+  - audioClip: {fileID: 8300000, guid: fae4bb9b9dacba84499d229f511583d9, type: 3}
+    audioName: Television
+    startVol: 1
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: be8f9092db0c40d41badcb4e540b39c0, type: 3}
+    audioName: Chain
+    startVol: 1.5
+    startSkip: 0
+  - audioClip: {fileID: 8300000, guid: 3e9b4b0dc1b87df49aaa37ddfe350ec8, type: 3}
+    audioName: OutSwaps
+    startVol: 3
+    startSkip: 0
+  mainMenuMusic:
+  - audioClip: {fileID: 8300000, guid: 6395879a23da445449db999f843c83cb, type: 3}
+    audioName: MainMenu1
+    startVol: 0.6
+    startSkip: 0
+    faction: MainMenu
+  arnolicaMusic:
+  - audioClip: {fileID: 8300000, guid: 6ea049bd9428c1f4eb1c36bcb5261459, type: 3}
+    audioName: Arnolica1
+    startVol: 1
+    startSkip: 0
+    faction: Arnolica
+  - audioClip: {fileID: 8300000, guid: a3d7bd4980747e543991753ceaab0eab, type: 3}
+    audioName: Arnolica2
+    startVol: 1
+    startSkip: 0
+    faction: Arnolica
+  - audioClip: {fileID: 8300000, guid: cd87f797ded0cc547b53f85fafab4bf5, type: 3}
+    audioName: Arnolica3
+    startVol: 1
+    startSkip: 0
+    faction: Arnolica
+  - audioClip: {fileID: 8300000, guid: cfce1f1aae0f0394a8d2a17343e50595, type: 3}
+    audioName: Arnolica4
+    startVol: 1
+    startSkip: 0
+    faction: Arnolica
+  foliardMusic:
+  - audioClip: {fileID: 8300000, guid: 9ba2311acaae8e345a15ffc493741aeb, type: 3}
+    audioName: 
+    startVol: 0.2
+    startSkip: 0
+    faction: Foliard
+  xatesMusic:
+  - audioClip: {fileID: 8300000, guid: 092a98358c6a3234986d90fcfbceda6e, type: 3}
+    audioName: Xates1
+    startVol: 1
+    startSkip: 0
+    faction: Xates

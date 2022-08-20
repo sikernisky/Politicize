@@ -6,6 +6,8 @@ using TMPro;
 
 /// <summary>
 /// Represents the container for all Squares in a level.
+/// 
+/// There may only be one map per scene.
 /// </summary>
 public class Map : MonoBehaviour
 {
@@ -29,6 +31,9 @@ public class Map : MonoBehaviour
 
     /// <summary>All Squares that are currently on this Map. </summary>
     private HashSet<Square> activeSquares;
+
+    /// <summary>All Obstacles in this map.</summary>
+    private HashSet<Obstacle> obstacles;
 
     /// <summary>true if the player has won this Map.</summary>
     private bool mapWon;
@@ -121,16 +126,36 @@ public class Map : MonoBehaviour
     /// </summary>
     private Stack<(Dictionary<Square, Vector2Int>, Dictionary<Square, Transform>)> mapStates;
 
+    /// <summary>The positions part of the map state that was last added. </summary>
+    private Dictionary<Square, Vector2Int> prevAddedPositions;
+
+    /// <summary>The parents part of the map state that was last added. </summary>
+    private Dictionary<Square, Transform> prevAddedParents;
+
     /// <summary>Number of swaps the player has left.</summary>
     private int swapsRemaining;
 
     /// <summary>This map's graveyard.</summary>
     private Transform graveyard;
 
+    /// <summary>true if this map is resetting is tiles.</summary>
+    private bool resetting;
+
+    /// <summary>How many times the user has pressed the arrow keys. </summary>
+    private static int arrowKeyCounter;
+
+    [SerializeField]
+    ///<summary>true if this Map should reset on start.</summary>
+    private bool resetOnStart = true;
+
+    /// <summary>true if this Map is shaking.</summary>
+    private bool shaking;
+
 
     private void Awake()
     {
         GatherDistrictsAndSquares();
+        CreateGraveyard();
     }
 
     private void Start()
@@ -142,7 +167,7 @@ public class Map : MonoBehaviour
         SetSizes();
         PlayAnimations();
         EnablePowerups();
-        CreateGraveyard();
+        if(resetOnStart) ResetMap(false);
 
         LevelManager.playable = true;
     }
@@ -156,29 +181,63 @@ public class Map : MonoBehaviour
         UpdateDistrictCounter();
         if (Won() && !levelOver) OnWin();
 
-        //if (Input.GetKeyDown(KeyCode.E)) EndLevel();
+        //if (Input.GetKeyDown(KeyCode.Z)) EndLevel();
+        if (Input.GetKeyDown(KeyCode.R)) ResetMap();
+        if (Input.GetKeyDown(KeyCode.U)) TryUndo();
 
+        if (shaking) Debug.Log("shaking");
+    }
+
+
+
+    /// <summary>
+    /// Resets this map to how it started originally:
+    /// 
+    /// - Lerps all Squares to their starting positions
+    /// - Resets all counters
+    /// - (Re)enables all districts.
+    /// </summary>
+    public void ResetMap(bool playAudio = true)
+    {
+        if (Won()) return;
+        foreach (Square s in allSquares)
+        {
+            if (s.Resetting()) return;
+        }
+
+        StartCoroutine(ResetMapCoro(playAudio));
     }
 
     /// <summary>
-    /// Resets this map to how it started originally.
+    /// Resets the Map without checking for disqualifying conditions.
     /// </summary>
-    public void ResetMap()
+    public void ForceResetMap()
     {
         StartCoroutine(ResetMapCoro());
     }
 
-    private IEnumerator ResetMapCoro()
+    private IEnumerator ResetMapCoro(bool playAudio = true)
     {
+
         levelOver = false;
-        SwappableSquare.ResetSwapCount();
+        resetting = true;
+        SwapManager.ResetSwapCount();
+
+        AudioManager am = FindObjectOfType<AudioManager>();
+        if (am != null && !am.Playing("Reset") && playAudio) am.Play("Reset");
 
         yield return new WaitForSeconds(SwappableSquare.swapLerpDuration);
+
 
         if (mapStates != null) mapStates.Clear();
 
         HashSet<Square> newAllSquares = new HashSet<Square>();
              
+        foreach(District d in districts)
+        {
+            d.EnableDistrict();
+        }
+
         foreach (Square s in allSquares)
         {
             if (!originalSquares.Contains(s))
@@ -195,6 +254,8 @@ public class Map : MonoBehaviour
             }
         }
         allSquares = newAllSquares;
+        resetting = false;
+
     }
 
     /// <summary>
@@ -215,12 +276,17 @@ public class Map : MonoBehaviour
     {
         if (mapStates == null || mapStates.Count == 0) return;
         if (Won()) return;
-        SwappableSquare.AddToSwapCount(1);
+        if (resetting) return;
+        if (Shaking()) return;
 
-        foreach(Square s in allSquares)
+
+        foreach (Square s in allSquares)
         {
             if (s.Resetting()) return;
         }
+
+
+        FindObjectOfType<AudioManager>().Play("Undo");
 
         (Dictionary<Square, Vector2Int>, Dictionary<Square, Transform>) state = mapStates.Pop();
 
@@ -240,10 +306,11 @@ public class Map : MonoBehaviour
                 activeSquares.Add(s);
                 allSquares.Add(s);
             }
-
         }
+        SwapManager.AddToSwapCount(1);
+
     }
-    
+
     /// <summary>
     /// Filters Squares such that only previous state's squares can remain on the board.
     /// </summary>
@@ -265,6 +332,9 @@ public class Map : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the scale of all Squares in this map to <c>squareSize</c>.
+    /// </summary>
     private void SetSizes()
     {
         foreach(Square s in allSquares)
@@ -291,14 +361,18 @@ public class Map : MonoBehaviour
         LevelManager.playable = false;
         levelOver = true;
 
+        FindObjectOfType<AudioManager>().Play("WinLevel");
+
         if (lastLevel)
         {
-            sceneChanger.ChangeScene("Xates0");
+            if(faction == "Xates") sceneChanger.ChangeScene("DemoEnd");
+            else sceneChanger.ChangeScene("LevelSelect");
             SaveManager.data.CompleteFaction(faction);
-            SaveManager.data.UnlockFaction(faction);
+            SaveManager.data.UnlockNextFaction(faction);
         }
         else
         {
+            if (sceneChanger == null) sceneChanger = FindObjectOfType<SceneChangeButton>();
             sceneChanger.ChangeScene(SaveManager.data.currentFaction + (SaveManager.data.CurrentLevel() + 1).ToString());
         }
 
@@ -314,10 +388,13 @@ public class Map : MonoBehaviour
         allSquares = new HashSet<Square>();
         originalSquares = new HashSet<Square>();
         activeSquares = new HashSet<Square>();
+        obstacles = new HashSet<Obstacle>();
         foreach(Transform t in transform)
         {
             District d = t.GetComponent<District>();
-            if (d != null)
+            Obstacle o = t.GetComponent<Obstacle>();
+
+            if (d != null) //Child is a District.
             {
                 districts.Add(d);
                 foreach(Transform tt in d.transform)
@@ -328,8 +405,14 @@ public class Map : MonoBehaviour
                         allSquares.Add(s);
                         originalSquares.Add(s);
                         activeSquares.Add(s);
+                        s.FindParentDistrictAndMap();
                     }
                 }
+            }
+
+            if(o != null) //Child is an Obstacle.
+            {
+                obstacles.Add(o);
             }
         }
     }
@@ -352,9 +435,24 @@ public class Map : MonoBehaviour
     /// <param name="s"></param>
     public void BanishSquare(Square s)
     {
+        if (!activeSquares.Contains(s)) return;
+        s.OnBanish();
         s.transform.SetParent(graveyard);
         activeSquares.Remove(s);
         s.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Returns true if a Square is banished.
+    /// </summary>
+    /// <returns></returns>
+    public bool Banished(Square s)
+    {
+        foreach(Transform t in graveyard)
+        {
+            if (t.GetComponent<Square>() == s) return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -367,6 +465,7 @@ public class Map : MonoBehaviour
         allSquares.Add(s);
         if(active) activeSquares.Add(s);
         s.transform.SetParent(d.transform);
+        s.FindParentDistrictAndMap();
     }
 
     /// <summary>
@@ -393,18 +492,35 @@ public class Map : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns true if a Square is in the graveyard.
+    /// Returns a HashSet of Squares that surround a position.
     /// </summary>
-    /// <param name="s">the square to check if in graveyard.</param>
-    /// <returns>true if s is in the graveyard.</returns>
-    private bool InGraveyard(Square s)
+    /// <returns></returns>
+    public HashSet<Square> SurroundingSquares(Vector2Int pos)
     {
-        foreach(Transform t in graveyard)
-        {
-            if (t.GetComponent<Square>() == s) return true;
-        }
-        return false;
+        HashSet<Square> surrounding = new HashSet<Square>();
+        int xPos = pos.x;
+        int yPos = pos.y;
+
+        Square left = SquareByPos(new Vector2Int(xPos - 1, yPos));
+        if (left != null) surrounding.Add(left);
+        Square right = SquareByPos(new Vector2Int(xPos + 1, yPos));
+        if (right != null) surrounding.Add(right);
+        Square up = SquareByPos(new Vector2Int(xPos, yPos + 1));
+        if (up != null) surrounding.Add(up);
+        Square down = SquareByPos(new Vector2Int(xPos, yPos - 1));
+        if (down != null) surrounding.Add(down);
+        Square topLeft = SquareByPos(new Vector2Int(xPos - 1, yPos + 1));
+        if (topLeft != null) surrounding.Add(topLeft);
+        Square topRight = SquareByPos(new Vector2Int(xPos + 1, yPos + 1));
+        if (topRight != null) surrounding.Add(topRight);
+        Square botLeft = SquareByPos(new Vector2Int(xPos - 1, yPos - 1));
+        if (botLeft != null) surrounding.Add(botLeft);
+        Square botRight = SquareByPos(new Vector2Int(xPos + 1, yPos - 1));
+        if (botRight != null) surrounding.Add(botRight);
+
+        return surrounding;
     }
+
 
     /// <summary>
     /// Returns the size of all Squares in this Map.
@@ -430,17 +546,17 @@ public class Map : MonoBehaviour
     private void UpdateLevelWon()
     {
         int wonDistricts = 0;
+        int activeDistricts = 0;
         foreach(District d in districts)
         {
-            if (d.WinConditionMet()) wonDistricts++;
+            if (d.WinConditionMet() && d.Active()) wonDistricts++;
+            if (d.Active()) activeDistricts++;
         }
-        float ratio = (float)wonDistricts / districts.Count;
 
-
-        //Checking for disqualifying conditions.
+        float ratio = (float)wonDistricts / activeDistricts;
 
         if (ratio <= .5) mapWon = false;
-        else if (SwappableSquare.TotalSwapsPerformed() > swapLimit && SwapLimitEnabled()) mapWon = false;
+        else if (SwapManager.CurrentSwaps() > swapLimit && SwapLimitEnabled()) mapWon = false;
         else mapWon = true;
     }
 
@@ -450,7 +566,7 @@ public class Map : MonoBehaviour
     /// <returns>true if the player has gone over the swap limit.</returns>
     public bool TooManySwaps()
     {
-        return SwappableSquare.TotalSwapsPerformed() >= swapLimit;
+        return SwapManager.CurrentSwaps() >= swapLimit;
     }
 
     /// <summary>
@@ -528,20 +644,7 @@ public class Map : MonoBehaviour
         foreach(District d in districts)
         {
             d.UpdateSquares();
-            d.TryLockSquares();
         }
-
-
-    }
-
-
-    /// <summary>
-    /// Adds to the SwapLimit.
-    /// </summary>
-    /// <param name="amount">The amount to add.</param>
-    public void AddToSwapLimit(int amount)
-    {
-        swapLimit += amount;
     }
 
     /// <summary>
@@ -574,7 +677,7 @@ public class Map : MonoBehaviour
     /// </summary>
     private void UpdateSwapCounter()
     {
-        swapsRemaining = swapLimit - SwappableSquare.TotalSwapsPerformed();
+        swapsRemaining = swapLimit - SwapManager.CurrentSwaps();
         if (swapLimitDisabled) return;
         if (swapCounterText == null) return;
         swapCounterText.text = swapsRemaining.ToString();
@@ -599,11 +702,16 @@ public class Map : MonoBehaviour
         if (districtsNeededText == null) return;
         if (districtCounterText == null) return;
         int numWon = 0;
+        int numActive = 0;
         foreach(District d in districts)
         {
-            if (d.WinConditionMet()) numWon++;
+            if (d.Active())
+            {
+                numActive++;
+                if (d.WinConditionMet()) numWon++;
+            }
         }
-        districtCounterText.text = (numWon.ToString()) + "/" + (districts.Count.ToString());
+        districtCounterText.text = (numWon.ToString()) + "/" + (numActive.ToString());
         districtsNeededText.text = "NEED TO WIN: " + NeededDistricts().ToString(); 
     }
 
@@ -613,11 +721,14 @@ public class Map : MonoBehaviour
     /// <returns>The int number of districts needed to win this Map.</returns>
     private int NeededDistricts()
     {
-        for (int i = 1; i <= districts.Count; i++)
+        HashSet<District> activeDistricts = new HashSet<District>();
+        foreach(District d in districts) { if (d.Active()) activeDistricts.Add(d); }
+
+        for (int i = 1; i <= activeDistricts.Count; i++)
         {
-            if ((float)i / (float)districts.Count > .5f) return i;
+            if ((float)i / (float)activeDistricts.Count > .5f) return i;
         }
-        return districts.Count;
+        return activeDistricts.Count;
     }
 
     /// <summary>
@@ -626,7 +737,7 @@ public class Map : MonoBehaviour
     private void SetupSwapCounter()
     {
         if (swapCounterText == null) return;
-        SwappableSquare.ResetSwapCount();
+        SwapManager.ResetSwapCount();
         swapCounterText.text = swapLimit.ToString();
     }
 
@@ -646,7 +757,6 @@ public class Map : MonoBehaviour
     {
         SaveManager.data.SetCurrentFaction(faction);
         SaveManager.data.SetCurrrentLevel(levelNum);
-
     }
 
     /// <summary>
@@ -671,7 +781,8 @@ public class Map : MonoBehaviour
     IEnumerator ShowLabelDelay(Square s)
     {
         yield return new WaitForSeconds(1f);
-        if (s.Hovering())
+        if (s == null) yield return null;
+        else if (s.Hovering())
         {
             label.transform.position = s.transform.position;
             label.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
@@ -702,7 +813,23 @@ public class Map : MonoBehaviour
             prevParents.Add(s, s.ParentDistrict().transform);
             s.UpdateState();
         }
-        mapStates.Push((prevPositions, prevParents));
+
+        if(!prevPositions.Equals(prevAddedPositions) && !prevParents.Equals(prevAddedParents))
+        {
+            mapStates.Push((prevPositions, prevParents));
+            prevAddedParents = prevParents;
+            prevAddedPositions = prevPositions;
+        }
+    }
+
+    /// <summary>
+    /// Removes the previously added map state.
+    /// </summary>
+    public void RemoveLastMapState()
+    {
+        if (mapStates == null) return;
+        if (mapStates.Count == 0) return;
+        mapStates.Pop();
     }
 
     /// <summary>
@@ -712,8 +839,64 @@ public class Map : MonoBehaviour
     {
         if (SaveManager.data.moreSwaps) swapLimit = swapLimit + (int) Mathf.Round(swapLimit * .1f);
 
-        undoButton.SetActive(true);
+        if(undoButton != null) undoButton.SetActive(true);
 
     }
+
+    /// <summary>
+    /// Returns true if this map is the last level in the faction.
+    /// </summary>
+    /// <returns>true if this Map is the last level in the faction, false otherwise.</returns>
+    public bool FinalLevel()
+    {
+        return lastLevel;
+    }
+
+    /// <summary>
+    /// Tries to lock all squares.
+    /// </summary>
+    public void TryLockAllSquares()
+    {
+        foreach(District d in districts)
+        {
+            d.TryLockSquares();
+        }
+    }
+
+    /// <summary>
+    /// Shakes this Map. 
+    /// </summary>
+    public void Shake()
+    {
+        shaking = true;
+        mapAnimator.SetTrigger("shake");
+    }
+
+    /// <summary>
+    /// Stops shaking this map.
+    /// </summary>
+    public void StopShaking()
+    {
+        shaking = false;
+    }
+
+    /// <summary>
+    /// Returns true if this Map is shaking, false otherwise.
+    /// </summary>
+    /// <returns>true if this Map is shaking, false otherwise.</returns>
+    public bool Shaking()
+    {
+        return shaking;
+    }
+
+    /// <summary>
+    /// Returns true if this Map is resetting.
+    /// </summary>
+    /// <returns>true if this Map is resetting.</returns>
+    public bool MapResetting()
+    {
+        return resetting;
+    }
+
 
 }

@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5293867381611185220
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2497015855386282134, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3071190005802047937, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: party
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3071190005802047937, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: animationTrack.Array.data[0]
+      value: 
+      objectReference: {fileID: 21300000, guid: c81f3515e53f4cf4899ce2ca5d7eefda, type: 3}
+    - target: {fileID: 3071190005802047937, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: animationTrack.Array.data[1]
+      value: 
+      objectReference: {fileID: 21300000, guid: 3295d8c9c85d9ae488e935e31b898cd1, type: 3}
+    - target: {fileID: 3071190005802047937, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: animationTrack.Array.data[2]
+      value: 
+      objectReference: {fileID: 21300000, guid: 727ba38b5c188cc4cb8267fae99ac89f, type: 3}
+    - target: {fileID: 3071190005802047937, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: animationTrack.Array.data[3]
+      value: 
+      objectReference: {fileID: 21300000, guid: 44f51e02def55b34785e5eb7385f83cb, type: 3}
+    - target: {fileID: 7483637384132954120, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c81f3515e53f4cf4899ce2ca5d7eefda, type: 3}
+    - target: {fileID: 8411543071979968167, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}
+      propertyPath: m_Name
+      value: DeathTelevision
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 37c843aa4c8e71c4481c5ea5ef171ca1, type: 3}

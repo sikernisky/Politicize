@@ -13,39 +13,32 @@ using TMPro;
 /// </summary>
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField]
     /// <summary>The options menu.</summary>
-    private Image optionsMenu;
-
-    [SerializeField]
-    ///<summary>The main menu button under the options menu.</summary>
-    private Image mainMenuButton;
-
-    [SerializeField]
-    ///<summary>The text field for the district's name.</summary>
-    private TMP_Text districtNameText;
-
-    [SerializeField]
-    ///<summary>The text field for the district's progress.</summary>
-    private TMP_Text districtProgressText;
-
-    [SerializeField]
-    ///<summary>The text field for the district's captured.</summary>
-    private TMP_Text districtCapturedText;
+    private OptionsMenu optionsMenu;
 
     /// <summary>The Level Manager of this level. </summary>
     public static LevelManager levelManager;
 
-    /// <summary>The number that represents this level. Zero corresponds to tutorial.</summary>
-    private static int levelNumber;
-
     /// <summary>true if the player can interact with the game, false otherwise.</summary>
     public static bool playable = true;
 
+    /// <summary>true if the player is playing a level. </summary>
+    private static bool inGame;
+
+
+    private void Awake()
+    {
+        SpawnAudioManager();
+        SpawnOptionsMenu();
+        SpawnAnimManager();
+        inGame = PlayingLevel();
+        SpawnSwapManager();
+    }
 
     private void Start()
     {
         levelManager = this;
+        CapMap();
     }
 
     void Update()
@@ -54,22 +47,57 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates the District "inventory" display to represent the information
-    /// of district <c>d</c>.
+    /// Instantiates the AudioManager if it isn't already in the scene.
     /// </summary>
-    /// <param name="d">The district to display.</param>
-    public void UpdateDistrictDisplay(District d)
+    private void SpawnAudioManager()
     {
-        if (districtNameText != null) districtNameText.text = d.Name();
-        if (districtCapturedText != null)
+        if (FindObjectOfType<AudioManager>() == null)
         {
-            districtCapturedText.text = d.NumDeath().ToString();
-        }
-        if (districtProgressText != null)
-        {
-            districtProgressText.text = d.NumDeath().ToString() + " / " + d.Size().ToString();
+            Instantiate(Resources.Load<GameObject>("UI/AudioManager"));
         }
     }
+
+    /// <summary>
+    /// Instantiates the OptionsMenu if it isn't already in the scene.
+    /// </summary>
+    private void SpawnOptionsMenu()
+    {
+        if (FindObjectOfType<OptionsMenu>() == null)
+        {
+            Instantiate(Resources.Load<GameObject>("UI/OptionsMenu"), FindObjectOfType<Canvas>().transform);
+            optionsMenu = FindObjectOfType<OptionsMenu>();
+        }
+    }
+
+
+    /// <summary>
+    /// Instantiates the Animation Manager if it isn't already in the scene.
+    /// </summary>
+    private void SpawnAnimManager()
+    {
+        if (FindObjectOfType<AnimManager>() == null)
+        {
+            Instantiate(Resources.Load<GameObject>("UI/AnimManager"));
+        }
+    }
+
+    /// <summary>
+    /// Instantiates the Swap Manager if it isn't already in the scene.
+    /// </summary>
+    private void SpawnSwapManager()
+    {
+        SwapManager swapManager = new GameObject("SwappableManager").AddComponent<SwapManager>();
+    }
+
+    /// <summary>
+    /// Returns true if the player is playing a level, false otherwise.
+    /// </summary>
+    /// <returns>true if the player is playing a level, false otherwise.</returns>
+    private bool PlayingLevel()
+    {
+        return FindObjectOfType<Map>() != null;
+    }
+
 
     /// <summary>
     /// Pops up the options menu if it isn't already.
@@ -77,25 +105,8 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     private void OptionsPopup()
     {
-        //TODO: Add an animation.
-        if (optionsMenu.enabled)
-        {
-            optionsMenu.enabled = false;
-            mainMenuButton.enabled = false;
-        }
-        else
-        {
-            optionsMenu.enabled = true;
-            mainMenuButton.enabled = true;
-        }
-    }
-
-    /// <summary>
-    /// Pauses the game, performing necessary actions.
-    /// </summary>
-    private void PauseGame()
-    {
-        
+        if (optionsMenu.gameObject.activeInHierarchy) optionsMenu.HideOptionsMenu();
+        else optionsMenu.ShowOptionsMenu();
     }
 
     /// <summary>
@@ -103,11 +114,20 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     private void CheckEscape()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            OptionsPopup();
-            PauseGame();
-        }
+        if (Input.GetKeyDown(KeyCode.Escape)) OptionsPopup();
     }
+
+    /// <summary>
+    /// Caps the number of Maps per scene. 
+    /// </summary>
+    private void CapMap()
+    {
+        Map[] maps = FindObjectsOfType<Map>();
+        if (maps.Length <= 1) return;
+        Debug.Log("Cannot have more than one map per scene.");
+        Debug.Break();
+    }
+
+
 }
 

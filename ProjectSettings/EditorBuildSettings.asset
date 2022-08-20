@@ -8,56 +8,56 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: b6445f4d2c3e84c439779f81c9f8ca92
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/LevelSelect.unity
     guid: fb6d83e639ca0a141b80870daed78392
   - enabled: 0
     path: Assets/Scenes/Sandbox.unity
     guid: 56c8dbad7b3726149bd85d423ca4b6e2
-  - enabled: 0
-    path: Assets/Scenes/Levels/Tutorial.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Tutorial.unity
     guid: 5ccf1d4bd32cc014490739b9269ddf6d
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica1.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica1.unity
     guid: d0f6d2d457fd49942a530313af3360b4
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica2.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica2.unity
     guid: bd1eea8a0d6df0f41b14900421da3e3e
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica3.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica3.unity
     guid: 11338b1f2e2169443b2f6f5df23bf3a2
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica4.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica4.unity
     guid: dcea7c1f8d6a65f4a96089fb14bbd255
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica5.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica5.unity
     guid: 3123c989bd1bd5949b999b35ed481eed
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica6.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica6.unity
     guid: dc2299ebfcf8341478dd3fcc7073652c
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica7.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica7.unity
     guid: 6504cae485b696143baef05b8eb7a09c
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica8.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica8.unity
     guid: c54a3ef51d583c240829b1960665bcd7
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica9.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica9.unity
     guid: 443b08ccfdc619348887c29123cca2ed
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica10.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica10.unity
     guid: bd20c2084e2495b4c95e221a75ebfeea
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica11.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica11.unity
     guid: 16fb5d50be8b3de42834032829bc9752
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica12.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica12.unity
     guid: fa7754906830b1648b307ce60ba7f122
-  - enabled: 0
-    path: Assets/Scenes/Levels/Arnolica13.unity
+  - enabled: 1
+    path: Assets/Scenes/Arnolica/Arnolica13.unity
     guid: 6a2ecf3f4137e594dad2f6332b4a7cc8
   - enabled: 1
     path: Assets/Scenes/Xates/Xates0.unity
@@ -90,6 +90,60 @@ EditorBuildSettings:
     path: Assets/Scenes/Xates/Xates9.unity
     guid: b8760cd7fb65a19429c2833459532908
   - enabled: 1
-    path: Assets/Scenes/Levels/DemoEnd.unity
+    path: Assets/Scenes/Xates/Xates10.unity
+    guid: 313fa3b0146a1ba41b7e2a87cd46a0b3
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates11.unity
+    guid: 85df532a124a95d49a1c1d940ebdc404
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates12.unity
+    guid: 9e17962556b9646449efcfd939e1eb9b
+  - enabled: 1
+    path: Assets/Scenes/Xates/Xates13.unity
+    guid: b949adcacf549434a94f1023c4981886
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard0.unity
+    guid: e8e2720758c40c040893575e5884c324
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard1.unity
+    guid: f06bab63129b22047ad7a4004d4b4458
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard2.unity
+    guid: 13aaf41031b4a7545ba48d2bad9513cc
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard3.unity
+    guid: 57588f677b5d4a44b89a336abd3ea2c9
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard4.unity
+    guid: 2963bacc1234c034f98173cef0edf4c2
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard5.unity
+    guid: e42f694210cf4124798339c2529cba18
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard6.unity
+    guid: c11b7b7507160284ba1d9fc6584c398b
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard7.unity
+    guid: 50cce2e9a6187d749b81372bf46568d0
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard8.unity
+    guid: 214534087cf47db40b8f791e66976aea
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard9.unity
+    guid: 86e167b74ff592b4dbf19cfe940deee1
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard10.unity
+    guid: f7ae9abb7bcab364cbff0001179ab740
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard11.unity
+    guid: ecf479e3b1f4d6144bf5fc537b83b5d0
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard12.unity
+    guid: 73cc68f92d84d7f489713e2a1f9fb87e
+  - enabled: 1
+    path: Assets/Scenes/Foliard/Foliard13.unity
+    guid: d9514221b9d4bee458cd19c7763a87f9
+  - enabled: 1
+    path: Assets/Scenes/DemoEnd.unity
     guid: eedf2c3a8db8c09429ff8a0cd1ec6e01
   m_configObjects: {}

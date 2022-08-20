@@ -7,13 +7,12 @@ public class Xates7Dialogue : DialogueManager
     public override void Start()
     {
         startQuotes = new string[] {
-            "Oh, look. It just got real.",
-            "This map contains an undecided voter bloc. They're on the fence.",
-            "Or, as I call them, stupid.",
-            "If you surround an undecided voter bloc with Death Party blocs, they'll turn green.",
-            "That means you should circle them. All eight sides: diagonals too!",
-            "But the same goes for Life Party blocs. So be careful.",
-            "Get to it. This faction is too hot!"
+            "Chained Voter Blocs are victims of the Life Party's cruel, for-profit prison system.",
+            "They're incarcerated and cannot vote until we free them.",
+            "To do that, swap them with a Compass Bloc until they're out of jail.",
+            "Then, they'll count towards our party.",
+            "As for Chained Life Party blocs, you might want to hide your morality and leave them be.",
+            "Remember our goal."
         };
         base.Start();
     }

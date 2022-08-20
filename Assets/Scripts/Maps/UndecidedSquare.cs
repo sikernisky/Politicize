@@ -28,29 +28,13 @@ public class UndecidedSquare : Square
         CheckToConvert();
     }
 
-    public override void OnReset()
+    public override void OnReset(bool lerp = true)
     {
         if(instantiatedCopy != null) transform.position = instantiatedCopy.transform.position;
         base.OnReset();
     }
 
-    /// <summary>
-    /// Converts this Square to a Life Party or Death Party bloc.
-    /// </summary>
-    /// <param name="newBloc">Which bloc to convert to.</param>
-    private void Convert(GameObject newBloc)
-    {
-        GameObject instantiated = Instantiate(newBloc);
-        ParentMap().AddSquare(instantiated.GetComponent<Square>(), transform.parent.GetComponent<District>());
-        instantiated.transform.position = transform.position;
-        instantiated.GetComponent<Square>().SetMapPosition(MapPosition().x, MapPosition().y);
-        instantiated.GetComponent<Square>().SetPopulation(Pop());
-        instantiated.transform.localScale = transform.localScale;
-        instantiated.GetComponent<SpriteRenderer>().sortingOrder = GetComponent<SpriteRenderer>().sortingOrder;
-        instantiated.GetComponent<Animator>().SetTrigger("fadeIn");
-        instantiatedCopy = instantiated;
-        ParentMap().BanishSquare(this);
-    }
+
 
     /// <summary>
     /// Checks if this Square should be converted.
@@ -77,8 +61,22 @@ public class UndecidedSquare : Square
             if (s.PoliticalParty() == Party.Death) allLife = false;
             if (s.PoliticalParty() == Party.Life) allDeath = false;
         }
-        if (allDeath) Convert(deathPartyBloc);
-        if (allLife) Convert(lifePartyBloc);
+        if (allDeath) base.ConvertParty(true, deathPartyBloc);
+        if (allLife) base.ConvertParty(true, lifePartyBloc);
+    }
+
+
+    /// <summary>
+    /// Converts this UndecidedSquare into a Life Party or Death Party bloc.
+    /// </summary>
+    /// <param name="playSound">whether to play a sound or not.</param>
+    /// <param name="party">the party to convert to.</param>
+    /// <returns></returns>
+    public GameObject ConvertParty(Party party, bool playSound = true)
+    {
+        if (party == Party.Death) return base.ConvertParty(playSound, deathPartyBloc);
+        else return base.ConvertParty(playSound, lifePartyBloc);
+        
     }
 
 

@@ -68,18 +68,15 @@ public class DialogueManager : MonoBehaviour
     /// <summary>True if this Dialogue has asked the Map to end the level.</summary>
     private bool ended;
 
-    [SerializeField]
-    ///<summary>Audioclip that plays whenever a text is revealed. </summary>
-    private AudioClip textAudio;
+    /// <summary>True if this Dialogue should play audio. </summary>
+    private bool playAudio = true;
 
-    [SerializeField]
-    ///<summary>This DialogueManager's AudioManager.</summary>
-    private AudioManager audioManager;
 
     public virtual void Start()
     {
         ResetDialogue();
         StartCoroutine(StartDelay(startQuotes, speakOnStartDelay));
+        dialogueArrowImage.GetComponent<Button>().onClick.AddListener(ClickDialogueButton);
     }
 
 
@@ -106,7 +103,11 @@ public class DialogueManager : MonoBehaviour
             ended = true;
             return;
         }
-        if (started) NextQuote();
+        if (started)
+        {
+            //FindObjectOfType<AudioManager>().Play("DialogueNext");
+            NextQuote();
+        }
     }
 
     private IEnumerator StartDelay(string[] quotes, float delay)
@@ -195,13 +196,15 @@ public class DialogueManager : MonoBehaviour
     /// <returns>The IENumerator of this Coroutine.</returns>
     private IEnumerator RevealText(string[] quotes)
     {
+        AudioManager am = FindObjectOfType<AudioManager>();
         currentQuoteNum++;
         textBox.maxVisibleCharacters = 0;
         textBox.text = quotes[currentQuoteNum];
         foreach(char c in textBox.text)
         {
+            if(playAudio) am.Play("RegrySpeak");
             textBox.maxVisibleCharacters++;
-            yield return new WaitForSeconds(.02f);
+            yield return new WaitForSeconds(.025f);
         }
     }
 
@@ -211,6 +214,7 @@ public class DialogueManager : MonoBehaviour
     private void ShowDialogueBox()
     {
         if (!hidden) return;
+        playAudio = true;
         dialogueAnimator.SetBool("show", true);
         hidden = false;
     }
@@ -222,6 +226,8 @@ public class DialogueManager : MonoBehaviour
     private void HideDialogueBox()
     {
         if (hidden) return;
+        playAudio = false;
+        dialogueAnimator.enabled = true;
         dialogueAnimator.SetBool("show", false);
         hidden = true;
     }
@@ -273,6 +279,14 @@ public class DialogueManager : MonoBehaviour
     protected bool OutOfCurrentQuotes()
     {
         return currentQuotes == null || currentQuoteNum >= currentQuotes.Length - 1;
+    }
+
+    /// <summary>
+    /// Disables the dialogue animator. 
+    /// </summary>
+    public void DisableAnimator()
+    {
+        dialogueAnimator.enabled = false;
     }
 }
 

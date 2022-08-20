@@ -46,20 +46,48 @@ public class CameraControl : MonoBehaviour
     ///<summary>The TileGrid this Camera's bounds are based on. </summary>
     private SpriteRenderer field;
 
+    private float lastWidth;
+    private float lastHeight;
+
 
 
     private void Start()
     {
-        CanDragCamera = true;
         myCam = GetComponent<Camera>();
-        SetDragBounds();
+        Screen.SetResolution(1920, 1080, true);
     }
 
     private void Update()
     {
-        if (CanDragCamera) MoveCamera();
-        CheckZoom();
-        CheckMove();
+        UpdateFullscreen();
+        ForceAspectRatio();
+    }
+
+    /// <summary>
+    /// Updates the window to fullscreen or windowed depending on the player's preferences.
+    /// </summary>
+    private void UpdateFullscreen()
+    {
+        if (SaveManager.data.fullscreen && !Screen.fullScreen) Screen.fullScreen = true;
+        else if (!SaveManager.data.fullscreen && Screen.fullScreen) Screen.fullScreen = false;
+    }
+
+    /// <summary>
+    /// Forces the screen to conform to a 16:9 ratio.
+    /// </summary>
+    private void ForceAspectRatio()
+    {
+        if (lastWidth != Screen.width)
+        {
+            Screen.SetResolution(Screen.width, (int)(Screen.width * (9f / 16f)), false);
+        }
+        else if (lastHeight != Screen.height)
+        {
+            Screen.SetResolution((int)(Screen.height * (16f / 9f)), Screen.height, false);
+        }
+
+        lastWidth = Screen.width;
+        lastHeight = Screen.height;
     }
 
     /// ///<summary>

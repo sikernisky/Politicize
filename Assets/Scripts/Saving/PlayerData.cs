@@ -25,28 +25,45 @@ public class PlayerData
     /// <summary>True if the player has access to the undo button. </summary>
     public bool undoActive = true;
 
+    /// <summary>Volume the player has their SFX set to. </summary>
+    public float sfxVol = .6f;
+
+    /// <summary>Volume the player has their Music set to. </summary>
+    public float musicVol = .6f;
+
+    /// <summary>The page index of the LevelIndex. </summary>
+    public int levelSelectPage;
+
+    /// <summary>true if the player has the game in fullscreen mode.</summary>
+    public bool fullscreen;
+
+
     /// <summary>Factions and their highest level unlocked.</summary>
     public Dictionary<string, int> factions = new Dictionary<string, int>()
     {
         {"Arnolica", 0},
+        {"Foliard", 0},
         {"Xates", 0 },
-        {"Ryndalma", 0}
+        {"Gorneo", 0}
+
     };
 
     /// <summary>Factions and whether they have been completed or not. </summary>
     public Dictionary<string, bool> factionsCompleted = new Dictionary<string, bool>()
     {
         {"Arnolica", false},
+        {"Foliard", false},
         {"Xates", false},
-        {"Ryndalma", false}
+        {"Gorneo", false}
     };
 
     /// <summary>Factions and whether they have been unlocked or not.</summary>
     public Dictionary<string, bool> factionsUnlocked = new Dictionary<string, bool>()
     {
         {"Arnolica", true },
+        {"Foliard", false},
         {"Xates", false },
-        {"Ryndalma", false}
+        {"Gorneo", false}
     };
 
 
@@ -139,16 +156,19 @@ public class PlayerData
     /// Unlocks the next faction.
     /// </summary>
     /// <param name="factionName">the faction to before the one to unlock.</param>
-    public void UnlockFaction(string factionName)
+    public void UnlockNextFaction(string currentFaction)
     {
         string nextFac = "";
-        switch (factionName)
+        switch (currentFaction)
         {
             case "Arnolica":
+                nextFac = "Foliard";
+                break;
+            case "Foliard":
                 nextFac = "Xates";
                 break;
             case "Xates":
-                nextFac = "Ryndalma";
+                nextFac = "Gorneo";
                 break;
             default:
                 nextFac = "Arnolica";

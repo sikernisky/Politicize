@@ -17,36 +17,20 @@ MonoBehaviour:
   yPos: 0
   party: 2
   leftConnector: {fileID: 3917449820962233334}
-  lockedLeftConnector: {fileID: 21300000, guid: 3328540ede79e8c499e5eed20276aca3, type: 3}
-  unlockedLeftConnector: {fileID: 21300000, guid: 76dcb82fe8a80f14b8046b5c109df638, type: 3}
   rightConnector: {fileID: 3917449821668682451}
-  lockedRightConnector: {fileID: 21300000, guid: f745859d385eebf48ab66490e570e292, type: 3}
-  unlockedRightConnector: {fileID: 21300000, guid: ff15c669d56516b49a89547adb5c9d32, type: 3}
   topConnector: {fileID: 3917449820883941198}
-  lockedTopConnector: {fileID: 21300000, guid: ad7a638507d380249a9065d480df50de, type: 3}
-  unlockedTopConnector: {fileID: 21300000, guid: 881497bdc5d5074449dda08d7ca76508, type: 3}
   botConnector: {fileID: 3917449821685029702}
-  lockedBotConnector: {fileID: 21300000, guid: cdf17aa1fcb90a243b4e6d0d31f4d4a1, type: 3}
-  unlockedBotConnector: {fileID: 21300000, guid: 237ebecdb6aaccf45abcf160e2f7425a, type: 3}
   topLeftConnector: {fileID: 4388186867854330480}
-  lockedTopLeftConnector: {fileID: 21300000, guid: 4a6a1f72f0ffcc147ad9917e9a8bd32f, type: 3}
-  unlockedTopLeftConnector: {fileID: 21300000, guid: 964e6a4026645454e85f81be4511e67f, type: 3}
   topRightConnector: {fileID: 8638752732714894317}
-  lockedTopRightConnector: {fileID: 21300000, guid: 4e4144501007a6943b6f87996b11d1c2, type: 3}
-  unlockedTopRightConnector: {fileID: 21300000, guid: 9bfd274722a58ae4ba8d2c66ffaabd36, type: 3}
   botLeftConnector: {fileID: 5069472741609146332}
-  lockedBotLeftConnector: {fileID: 21300000, guid: 5faf7173d2c57074891a02a60a25d024, type: 3}
-  unlockedBotLeftConnector: {fileID: 21300000, guid: 097bba61b51c6fd4697b121229c00711, type: 3}
   botRightConnector: {fileID: 1026596669431976828}
-  lockedBotRightConnector: {fileID: 21300000, guid: 73bdb5420fa39ab42905849300c50cc9, type: 3}
-  unlockedBotRightConnector: {fileID: 21300000, guid: 31aaf3f3dfbd21740a76b132e617c5a5, type: 3}
   squareAnim: {fileID: 8312876680814923815}
   lockedSprite: {fileID: 21300000, guid: 2d2c57de9f7f55d4c8cccb151f7b7c5c, type: 3}
   selectedSprite: {fileID: 21300000, guid: 29612768426a82e4ba0d4e04cc467b27, type: 3}
   unlockedSprite: {fileID: 21300000, guid: 29612768426a82e4ba0d4e04cc467b27, type: 3}
-  startSelected: 0
-  populationPlaque: {fileID: 5192617110799753378}
-  populationText: {fileID: 5808523218095127941}
+  populationPlaque: {fileID: 5973961151682197023}
+  populationIcon: {fileID: 2295613461725415409}
+  populationText: {fileID: 7974058222147755480}
   lerpResetCurve:
     serializedVersion: 2
     m_Curve:
@@ -71,6 +55,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  oppositePrefab: {fileID: 6685764414639755876, guid: 6081da9aa878e99498490d4b1fa70d4a, type: 3}
   deathPartyBloc: {fileID: 6685764414639755876, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
   lifePartyBloc: {fileID: 6685764414639755876, guid: 6081da9aa878e99498490d4b1fa70d4a, type: 3}
 --- !u!1001 &7680054174029472422
@@ -201,14 +186,14 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 7253676876242088410, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
   m_PrefabInstance: {fileID: 7680054174029472422}
   m_PrefabAsset: {fileID: 0}
---- !u!212 &5192617110799753378 stripped
+--- !u!212 &5973961151682197023 stripped
 SpriteRenderer:
-  m_CorrespondingSourceObject: {fileID: 2493561892922835460, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
+  m_CorrespondingSourceObject: {fileID: 4067540534540391609, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
   m_PrefabInstance: {fileID: 7680054174029472422}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5808523218095127941 stripped
+--- !u!114 &7974058222147755480 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4181888586068746019, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
+  m_CorrespondingSourceObject: {fileID: 305263051566628734, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
   m_PrefabInstance: {fileID: 7680054174029472422}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
@@ -217,3 +202,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!212 &2295613461725415409 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8452870380824552791, guid: a0eb3415cd74732488e002bceab360d1, type: 3}
+  m_PrefabInstance: {fileID: 7680054174029472422}
+  m_PrefabAsset: {fileID: 0}

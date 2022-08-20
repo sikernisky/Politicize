@@ -9,7 +9,6 @@ using UnityEngine.UI;
 /// </summary>
 public class SceneChangeButton: MonoBehaviour
 {
-    [SerializeField]
     ///<summary>The Animator for the Image that fades in and out.</summary>
     private Animator fader;
 
@@ -18,13 +17,27 @@ public class SceneChangeButton: MonoBehaviour
     private bool fade = true;
 
 
+    private void Start()
+    {
+        fader = FindObjectOfType<Fader>().GetComponent<Animator>();
+    }
+
     /// <summary>
     /// Changes the scene to <c>sceneName</c>.
     /// </summary>
-    public void ChangeScene(string sceneName)
+    public void ChangeScene(string sceneName, bool quick = false)
     {
-        if (fade) StartCoroutine(ChangeSceneFade(sceneName));
+        if (fade && !quick) StartCoroutine(ChangeSceneFade(sceneName));
+        else if (fade && quick) StartCoroutine(QuickChangeSceneFade(sceneName));
         else SceneManager.LoadScene(sceneName);
+    }
+
+    /// <summary>
+    /// Takes the player to LevelSelect.
+    /// </summary>
+    public void LevelSelect()
+    {
+        ChangeScene("LevelSelect", true);
     }
 
     /// <summary>
@@ -37,8 +50,18 @@ public class SceneChangeButton: MonoBehaviour
 
     IEnumerator ChangeSceneFade(string sceneName)
     {
-        fader.SetTrigger("fade");
         yield return new WaitForSeconds(1f);
+        fader.SetTrigger("fade");
+        yield return new WaitForSeconds(1.75f);
+        SceneManager.LoadScene(sceneName);
+    }
+
+    IEnumerator QuickChangeSceneFade(string sceneName)
+    {
+        fader.SetTrigger("fade");
+        yield return new WaitForSeconds(1.75f);
         SceneManager.LoadScene(sceneName);
     }
 }
+
+

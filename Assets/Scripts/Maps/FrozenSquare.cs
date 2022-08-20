@@ -43,7 +43,6 @@ public class FrozenSquare : Square
     protected override void Update()
     {
         base.Update();
-        OnAbsoluteMajority();
     }
 
     protected override void Start()
@@ -77,6 +76,7 @@ public class FrozenSquare : Square
     private void UnFreeze()
     {
         if (!currentlyFrozen) return;
+        FindObjectOfType<AudioManager>().Play("IceBreak");
         UpdateFreezeSprite(false);
         currentlyFrozen = false;
     }
@@ -110,13 +110,9 @@ public class FrozenSquare : Square
         }
     }
 
-    private void OnAbsoluteMajority()
-    {
-        if (!HasAbsoluteMajority()) return;
-        UnFreeze();
-    }
+   
 
-    public override void OnReset()
+    public override void OnReset(bool lerp = true)
     {
         base.OnReset();
         if(frozenStates != null) frozenStates.Clear();
@@ -134,8 +130,9 @@ public class FrozenSquare : Square
     {
         base.PrevState();
         if (frozenStates == null || frozenStates.Count == 0) return;
-        currentlyFrozen = frozenStates.Pop();
-        
+        bool freeze = frozenStates.Pop();
+        if (freeze) Freeze();
+        currentlyFrozen = freeze;
     }
 
     IEnumerator PlayFrozenAnimation()
@@ -156,5 +153,10 @@ public class FrozenSquare : Square
         }
     }
 
+    public void CheckToFreeze()
+    {
+        if (!HasAbsoluteMajority()) return;
+        UnFreeze();
+    }
 
 }

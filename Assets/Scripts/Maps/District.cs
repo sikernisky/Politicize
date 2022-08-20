@@ -15,8 +15,8 @@ public class District : MonoBehaviour
     ///<summary>The name of this District.</summary>
     private string districtName;
 
-/*    /// <summary>true if this District is highlighted. </summary>
-    private bool highlighted;*/
+    /// <summary>true if this District is actively counting towards a win condition. </summary>
+    private bool active = true;
 
 
     private void Awake()
@@ -27,12 +27,14 @@ public class District : MonoBehaviour
     private void Start()
     {
         TryLockSquares();
+        transform.localPosition = Vector3.zero;
     }
 
 
     private void Update()
     {
         HighlightAll();
+        if (Input.GetKeyDown(KeyCode.L)) TryLockSquares();
     }
 
     /// <summary>
@@ -49,6 +51,7 @@ public class District : MonoBehaviour
         }
         return childSquares;
     }
+
 
     /// <summary>
     /// Updates this District's squares.
@@ -141,6 +144,15 @@ public class District : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns true at least 50% of Squares in this District are Death Party tiles.
+    /// </summary>
+    /// <returns>true if >= 50% of Squares in this District are Death Party tiles, false otherwise.</returns>
+    public bool SimpleMajority()
+    {
+        return PercentageDeathPopulation() > .5f;
+    }
+
+    /// <summary>
     /// Returns the percentage of Squares in this District that represent
     /// the death party.
     /// </summary>
@@ -157,7 +169,6 @@ public class District : MonoBehaviour
     /// <returns>The percentage of population that represents the Death Party.</returns>
     private float PercentageDeathPopulation()
     {
-        squares = FindSquares();
         int totalDeath = 0;
         int totalAll = 0;
 
@@ -180,7 +191,6 @@ public class District : MonoBehaviour
     /// the Death Party.</returns>
     public int NumDeath()
     {
-        squares = FindSquares();
         int totalDeath = 0;
 
         foreach (Square s in squares)
@@ -205,14 +215,27 @@ public class District : MonoBehaviour
     }
 
     /// <summary>
-    /// Locks all Squares in this district if it has a majority.
+    /// Locks all Squares in this district if it has a majority, or unlocks them if it doesn't.
     /// </summary>
     public void TryLockSquares()
     {
+        squares = FindSquares();
+
         foreach (Square s in squares)
         {
             if (WinConditionMet()) s.LockSquare();
             else s.UnlockSquare();
+        }
+    }
+
+    /// <summary>
+    /// Unlocks all Squares in this district.
+    /// </summary>
+    public void UnlockAllSquares()
+    {
+        foreach (Square s in squares)
+        {
+            s.UnlockSquare();
         }
     }
 
@@ -225,6 +248,55 @@ public class District : MonoBehaviour
         return squares;
     }
 
-    
+    /// <summary>
+    /// Adds a Square to this district.
+    /// </summary>
+    /// <param name="s">The Square to add.</param>
+    public void AddSquare(Square s)
+    {
+        if (s != null)
+        {
+            squares.Add(s);
+            s.transform.SetParent(transform);
+        }
+    }
+
+    /// <summary>
+    /// Removes a Square to this district.
+    /// </summary>
+    /// <param name="s">The Square to remove.</param>
+    public void RemoveSquare(Square s)
+    {
+        if (squares.Contains(s)) squares.Remove(s);
+    }
+
+    /// <summary>
+    /// Removes this District from its Map's consideration when counting for a win.
+    /// </summary>
+    public void DisableDistrict()
+    {
+        if (!active) return;
+        active = false;
+    }
+
+    /// <summary>
+    /// Adds this District to its Map's consideration when counting for a win.
+    /// </summary>
+    public void EnableDistrict()
+    {
+        if (active) return;
+        active = true;
+    }
+
+    /// <summary>
+    /// Returns true if this District is active in its parent map, false otherwise. 
+    /// </summary>
+    /// <returns>true if this District is active in its parent map, false otherwise</returns>
+    public bool Active()
+    {
+        return active;
+    }
+
+
 
 }
