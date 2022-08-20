@@ -28,3 +28,7 @@
 
 ![Fake News.](https://user-images.githubusercontent.com/92184485/185762496-abb5ab5e-bb02-4734-9c2d-ba9e76673b6d.gif)
 
+
+## And So Much More!
+
+#### Balance population, minority groups, frozen voter blocs, and more. An alpha release is planned for January 2023. I hope you'll try it out!
