@@ -2,9 +2,16 @@
  
 ## A Puzzle Game to Confront the Dangers of Political Gerrymandering.
 
-#### You work for a cat named Regry. He's the president of the Death Party, a political organization that fights for a society with no laws. To gain power, he's enlisted you -- the nation's top political scientist -- to gerrymander political maps in his favor. In other words, he wants to employ dirty tactics and cheat democracy.
+### You work for a cat named Regry. He's the president of the Death Party, a political organization that fights for a society with no laws. To gain power, he's enlisted you -- the nation's top political scientist -- to gerrymander political maps in his favor. In other words, he wants to employ dirty tactics and cheat democracy.
+
+
+## Regry Darmen, The Death Party's President, Guides You Throughout th Game.
 
 ![Regry Guides You Throughout the Game.](https://user-images.githubusercontent.com/92184485/185762039-ca3a28fa-2259-48db-9dff-5f6eaf3f602b.gif)
 
 
-#### You'll have to move voter blocs around the grid with a limited number of moves such that it benefits the Death Party. Watch out, though, some voter blocs act differently than others!
+## Some Voter Blocs Explode - Watch Out!
+
+
+![Some Voter Blocs Explode.](https://user-images.githubusercontent.com/92184485/185762233-4a87a0b6-8d1e-4336-80b7-2b5e930b26db.gif)
+
