@@ -5,7 +5,7 @@
 ### You work for a cat named Regry. He's the president of the Death Party, a political organization that fights for a society with no laws. To gain power, he's enlisted you -- the nation's top political scientist -- to gerrymander political maps in his favor. In other words, he wants to employ dirty tactics and cheat democracy.
 
 
-## Regry Darmen, The Death Party's President, Guides You Throughout th Game.
+## Regry Darmen, The Death Party's President, Guides You Throughout the Game.
 
 ![Regry Guides You Throughout the Game.](https://user-images.githubusercontent.com/92184485/185762039-ca3a28fa-2259-48db-9dff-5f6eaf3f602b.gif)
 
