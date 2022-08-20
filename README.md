@@ -7,7 +7,14 @@
 
 ## Regry Darmen, The Death Party's President, Guides You Throughout the Game.
 
+
 ![Regry Guides You Throughout the Game.](https://user-images.githubusercontent.com/92184485/185762039-ca3a28fa-2259-48db-9dff-5f6eaf3f602b.gif)
+
+
+## Win a Majority of Districts to Advance.
+
+
+![Win A Majority](https://user-images.githubusercontent.com/92184485/185762696-5070c379-234e-4584-a5a4-bba1ce656e6b.gif)
 
 
 ## Some Voter Blocs Explode - Watch Out!
@@ -20,3 +27,4 @@
 
 
 ![Fake News.](https://user-images.githubusercontent.com/92184485/185762496-abb5ab5e-bb02-4734-9c2d-ba9e76673b6d.gif)
+
