@@ -15,3 +15,8 @@
 
 ![Some Voter Blocs Explode.](https://user-images.githubusercontent.com/92184485/185762233-4a87a0b6-8d1e-4336-80b7-2b5e930b26db.gif)
 
+
+## Keep Regry's Voter Blocs Away from Fake News.
+
+
+![Fake News.](https://user-images.githubusercontent.com/92184485/185762496-abb5ab5e-bb02-4734-9c2d-ba9e76673b6d.gif)
