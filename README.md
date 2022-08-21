@@ -4,7 +4,7 @@
 
 ### You work for a cat named Regry. He's the president of the Death Party, a political organization that fights for a society with no laws. To gain power, he's enlisted you -- the nation's top political scientist -- to gerrymander political maps in his favor. In other words, he wants you to employ dirty tactics and cheat democracy.
 
-### [Gerrymandering](https://assets.nationbuilder.com/fairvote/pages/6634/meta_images/original/How_to_Steal_an_Election_-_Gerrymandering.svg.png?1505232361) is when a political party changes voter districts to win more seats.
+### [Gerrymandering](https://assets.nationbuilder.com/fairvote/pages/6634/meta_images/original/How_to_Steal_an_Election_-_Gerrymandering.svg.png?1505232361){:target="\_blank"} is when a political party changes voter districts to win more seats.
 
 ## Regry Darmen, The Death Party's President, Guides You Throughout the Game.
 
