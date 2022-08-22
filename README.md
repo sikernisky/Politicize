@@ -1,8 +1,8 @@
 # Politicize
  
-## A Puzzle Game to Confront the Dangers of Political Gerrymandering.
+## A Puzzle Game to Navigate Political Gerrymandering.
 
-### You work for a cat named Regry. He's the president of the Death Party, a political organization that fights for a society with no laws. To gain power, he's enlisted you -- the nation's top political scientist -- to gerrymander political maps in his favor. In other words, he wants you to employ dirty tactics and cheat democracy.
+### You work for a corrupt politician named Regry. He's the president of the Death Party, a political organization that wants a society with no laws. To help candidates he supports gain power, he's enlisted you -- the nation's top political scientist -- to finagle the outcomes of elections by gerrymandering: changing the boundaries of voting districts to win more seats in his favor. He wants you to employ dirty tactics to cheat democracy.
 
 ### [Gerrymandering](https://assets.nationbuilder.com/fairvote/pages/6634/meta_images/original/How_to_Steal_an_Election_-_Gerrymandering.svg.png?1505232361) is when a political party changes voter districts to win more seats. It is antidemocratic.
 
